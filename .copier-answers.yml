@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier
+_commit: 0.1.5
+_src_path: gh:12rambau/pypackage
+author_email: pierrick.rambaud49@gmail.com
+author_first_name: Pierrick
+author_last_name: Rambaud
+author_orcid: 0000-0000-0000-0000
+github_repo_name: pytest-gee
+github_user: gee-community
+project_name: pytest-gee
+project_slug: pytest_gee
+short_description: The Python plugin for your GEE based packages.
