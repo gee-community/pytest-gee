@@ -2,8 +2,6 @@
 
 The nox run are build in isolated environment that will be stored in .nox. to force the venv update, remove the .nox/xxx folder.
 """
-import datetime
-import fileinput
 
 import nox
 
@@ -56,16 +54,3 @@ def stubgen(session):
     session.install("mypy")
     package = session.posargs or ["pytest_gee"]
     session.run("stubgen", "-p", package[0], "-o", "stubs", "--include-private")
-
-
-@nox.session(name="release-date", reuse_venv=True)
-def release_date(session):
-    """Update the release date of the citation file."""
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
-
-    with fileinput.FileInput("CITATION.cff", inplace=True) as file:
-        for line in file:
-            if line.startswith("date-released:"):
-                print(f'date-released: "{current_date}"')
-            else:
-                print(line, end="")

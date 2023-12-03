@@ -1,8 +1,13 @@
 """Test the pytest_gee package."""
+import ee
 
-import pytest_gee
+
+def test_hash_fixture(hash):
+    """Test the hash fixture."""
+    assert isinstance(hash, str)
+    assert len(hash) == 32
 
 
-def test_hello_world():
-    """Hello world test."""
-    assert pytest_gee.Hello().hello_world() == "hello world !"
+def test_gee_init():
+    """Test the init_ee_from_token function."""
+    assert ee.Number(1).getInfo() == 1

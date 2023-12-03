@@ -21,7 +21,9 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-  "deprecated>=1.2.14"
+  "deprecated>=1.2.14",
+  "earthengine-api",
+  "pytest",
 ]
 
 [[project.authors]]
@@ -38,6 +40,9 @@ content-type = "text/x-rst"
 [project.urls]
 Homepage = "https://github.com/gee-community/pytest-gee"
 
+[project.entry-points."pytest11"]
+gee = "pytest_gee.plugin"
+
 [project.optional-dependencies]
 test = [
   "pytest",
@@ -50,7 +55,8 @@ doc = [
   "pydata-sphinx-theme",
   "sphinx-copybutton",
   "sphinx-design",
-  "sphinx-autoapi"
+  "sphinx-autoapi",
+  "sphinxemoji",
 ]
 
 [tool.hatch.build.targets.wheel]
