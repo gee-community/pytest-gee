@@ -2,10 +2,10 @@
 import ee
 
 
-def test_hash_fixture(hash):
+def test_hash_fixture(gee_hash):
     """Test the hash fixture."""
-    assert isinstance(hash, str)
-    assert len(hash) == 32
+    assert isinstance(gee_hash, str)
+    assert len(gee_hash) == 32
 
 
 def test_gee_init():

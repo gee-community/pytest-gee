@@ -5,6 +5,6 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def hash():
+def gee_hash():
     """Generate a unique hash for the test session."""
     return uuid.uuid4().hex

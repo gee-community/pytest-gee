@@ -11,7 +11,7 @@ __email__ = "pierrick.rambaud49@gmail.com"
 
 
 def init_ee_from_token():
-    r"""Initialize earth engine according to the using a token.
+    r"""Initialize earth engine according using a token.
 
     THe environment used to run the tests need to have a EARTHENGINE_TOKEN variable.
     The content of this variable must be the copy of a personal credential file that you can find on your local computer if you already run the earth engine command line tool. See the usage question for a github action example.

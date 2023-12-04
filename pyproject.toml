@@ -57,6 +57,7 @@ doc = [
   "sphinx-design",
   "sphinx-autoapi",
   "sphinxemoji",
+  "sphinxcontrib-images",
 ]
 
 [tool.hatch.build.targets.wheel]
