@@ -56,9 +56,9 @@ Here is a github action example:
 .. thumbnail:: _static/github_env_var.png
     :title: Github action environment variable setup
 
-1. First go to the :guilabel:`settings`` of your Github repository
-1. Then to :guilabel:`secretes and variables` -> :guilabel:`Actions`
-1. In this page, set a :guilabel:`new repository secret` with the name ``EARTHENGINE_TOKEN`` and paste the content of your ``credentials`` file in the value field.
+#. First go to the :guilabel:`settings`` of your Github repository
+#. Then to :guilabel:`secretes and variables` -> :guilabel:`Actions`
+#. In this page, set a :guilabel:`new repository secret` with the name ``EARTHENGINE_TOKEN`` and paste the content of your ``credentials`` file in the value field.
 
 To make the variable available in your CI environment, you will need to add the following line in your action `.yaml` file:
 
