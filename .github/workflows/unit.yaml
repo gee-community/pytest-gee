@@ -85,5 +85,6 @@ jobs:
       - name: codecov
         uses: codecov/codecov-action@v3
         with:
+          file: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
