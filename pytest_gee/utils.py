@@ -6,10 +6,39 @@
 """
 from __future__ import annotations
 
+from datetime import time
 from pathlib import Path
 from typing import List, Optional, Union
 
 import ee
+
+
+def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
+    """Wait until the selected process is finished or we reached timeout value.
+
+    Args:
+        task: name of the running task or the Task object itself.
+        timeout: timeout in seconds. if set to 0 the parameter is ignored. default to 5 minutes.
+
+    Returns:
+        the final state of the task
+    """
+    # give 5 seconds of delay to GEE to make sure the task is created
+    time.sleep(5)
+
+    # init both the task object and the state
+    task = task if isinstance(task, ee.batch.Task) else get_task(task)
+    state = "UNSUBMITTED"
+
+    # loop every 5s to check the task state. This is blocking the Python interpreter
+    start_time = time.time()
+    while state != "COMPLETED" and time.time() - start_time < timeout:
+        time.sleep(5)
+        state = task.state
+        if state == "FAILED":
+            break
+
+    return state
 
 
 def get_task(task_descripsion: str) -> Optional[ee.batch.Task]:
@@ -52,3 +81,37 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
         return asset_list
 
     return _recursive_get(folder, asset_list)
+
+
+def export_asset(object: ee.ComputedObject, asset_id: Union[str, Path]) -> Path:
+    """Export assets to the GEE platform, only working for very simple objects.
+
+    ARgs:
+        object: the object to export
+        asset_id: the name of the asset to create
+
+    Returns:
+        the path of the created asset
+    """
+    asset_id = Path(asset_id)
+    if isinstance(object, ee.FeatureCollection):
+        task = ee.batch.Export.table.toAsset(
+            collection=object,
+            description=asset_id.stem,
+            assetId=str(asset_id),
+        )
+    elif isinstance(object, ee.Image):
+        task = ee.batch.Export.image.toAsset(
+            image=object,
+            description=asset_id.stem,
+            assetId=str(asset_id),
+            bestEffort=True,
+        )
+    else:
+        raise ValueError("Only ee.Image and ee.FeatureCollection are supported")
+
+    # launch the task and wait for the end of exportation
+    task.start()
+    wait(task)
+
+    return asset_id

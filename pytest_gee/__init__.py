@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import os
-from datetime import time
 from pathlib import Path
 from typing import Union
 
 import ee
 import httplib2
 
-from pytest_gee.utils import get_assets, get_task
+from pytest_gee import utils
 
 __version__ = "0.2.0"
 __author__ = "Pierrick Rambaud"
@@ -53,22 +52,9 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
     Returns:
         the final state of the task
     """
-    # give 5 seconds of delay to GEE to make sure the task is created
-    time.sleep(5)
-
-    # init both the task object and the state
-    task = task if isinstance(task, ee.batch.Task) else get_task(task)
-    state = "UNSUBMITTED"
-
-    # loop every 5s to check the task state. This is blocking the Python interpreter
-    start_time = time.time()
-    while state != "COMPLETED" and time.time() - start_time < timeout:
-        time.sleep(5)
-        state = task.state
-        if state == "FAILED":
-            break
-
-    return state
+    # just expose the utils function
+    # this is compulsory as wait is also needed in the utils module
+    return utils.wait(task, timeout)
 
 
 def delete_assets(asset_id: str, dry_run: bool = True) -> list:
@@ -104,7 +90,7 @@ def delete_assets(asset_id: str, dry_run: bool = True) -> list:
     if asset_info["type"] == "FOLDER":
 
         # get all the assets
-        asset_list = get_assets(folder=asset_id)
+        asset_list = utils.get_assets(folder=asset_id)
 
         # split the files by nesting levels
         # we will need to delete the more nested files first
@@ -124,3 +110,48 @@ def delete_assets(asset_id: str, dry_run: bool = True) -> list:
     delete(asset_id)
 
     return output
+
+
+def init_tree(structure: dict, prefix: str, account_root: str) -> Path:
+    """Create an EarthEngine folder tree from a dictionary.
+
+    The input ditionary should described the structure of the folder you want to create.
+    The keys are the folder names and the values are the subfolders.
+    Once you reach an ``ee.FeatureCollection`` and/or an ``ee.Image`` set it in the dictionary and the function will export the object.
+
+    Args:
+        structure: the structure of the folder to create
+        prefix: the prefix to use on every item (folder, tasks, asset_id, etc.)
+        account_root: the root folder of the test where to create the test folder.
+
+    Returns:
+        the path of the created folder
+
+    Examples:
+        >>> structure = {
+        ...     "folder_1": {
+        ...         "image": ee.image(1),
+        ...         "fc": ee.FeatureCollection(ee.Geometry.Point([0, 0])),
+        ...     },
+        ... }
+        ... init_tree(structure, "toto")
+    """
+    # recursive function to create the folder tree
+    def _recursive_create(structure, prefix, folder):
+        for name, content in structure.items():
+            if isinstance(content, dict):
+                loc_folder = f"{folder}/{prefix}_{name}"
+                ee.data.createAsset({"type": "FOLDER"}, loc_folder)
+                _recursive_create(content, prefix, loc_folder)
+            else:
+                utils.export_asset(content, Path(folder) / f"{prefix}_{name}")
+
+    # create the root folder
+    account_root = ee.data.getAssetRoots()[0]["id"]
+    root_folder = f"{account_root}/{prefix}"
+    root_folder = ee.data.createAsset({"type": "FOLDER"}, root_folder)
+
+    # start the recursive function
+    _recursive_create(structure, prefix)
+
+    return Path(root_folder)
