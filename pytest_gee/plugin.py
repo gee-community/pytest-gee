@@ -6,6 +6,8 @@ import uuid
 import ee
 import pytest
 
+from . import utils
+
 
 @pytest.fixture(scope="session")
 def gee_hash():
@@ -14,6 +16,22 @@ def gee_hash():
 
 
 @pytest.fixture(scope="session")
-def account_root():
+def gee_folder_root():
     """Link to the root folder of the connected account."""
     return ee.data.getAssetRoots()[0]["id"]
+
+
+@pytest.fixture(scope="session")
+def gee_folder_structure():
+    """The structure of the generated test folder."""
+    return {}
+
+
+@pytest.fixture(scope="session")
+def gee_test_folder(gee_hash, gee_folder_root, gee_folder_structure):
+    """Create a test folder for the duration of the test session."""
+    folder = utils.init_tree(gee_folder_structure, gee_hash, gee_folder_root)
+
+    yield folder
+
+    utils.delete_assets(folder, False)

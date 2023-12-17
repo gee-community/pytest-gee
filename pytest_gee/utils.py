@@ -119,3 +119,105 @@ def export_asset(
     wait(description)
 
     return asset_id
+
+
+def init_tree(structure: dict, prefix: str, root: str) -> Path:
+    """Create an EarthEngine folder tree from a dictionary.
+
+    The input ditionary should described the structure of the folder you want to create.
+    The keys are the folder names and the values are the subfolders.
+    Once you reach an ``ee.FeatureCollection`` and/or an ``ee.Image`` set it in the dictionary and the function will export the object.
+
+    Args:
+        structure: the structure of the folder to create
+        prefix: the prefix to use on every item (folder, tasks, asset_id, etc.)
+        root: the root folder of the test where to create the test folder.
+
+    Returns:
+        the path of the created folder
+
+    Examples:
+        >>> structure = {
+        ...     "folder_1": {
+        ...         "image": ee.image(1),
+        ...         "fc": ee.FeatureCollection(ee.Geometry.Point([0, 0])),
+        ...     },
+        ... }
+        ... init_tree(structure, "toto")
+    """
+    # recursive function to create the folder tree
+    def _recursive_create(structure, prefix, folder):
+        for name, content in structure.items():
+            asset_id = Path(folder) / name
+            description = f"{prefix}_{name}"
+            if isinstance(content, dict):
+                ee.data.createAsset({"type": "FOLDER"}, str(asset_id))
+                _recursive_create(content, prefix, asset_id)
+            else:
+                export_asset(content, asset_id, description)
+
+    # create the root folder
+    root = ee.data.getAssetRoots()[0]["id"]
+    root_folder = f"{root}/{prefix}"
+    ee.data.createAsset({"type": "FOLDER"}, root_folder)
+
+    # start the recursive function
+    _recursive_create(structure, prefix, root_folder)
+
+    return Path(root_folder)
+
+
+def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
+    """Delete the selected asset and all its content.
+
+    This method will delete all the files and folders existing in an asset folder.
+    By default a dry run will be launched and if you are satisfyed with the displayed names, change the ``dry_run`` variable to ``False``.
+    No other warnng will be displayed.
+
+    .. warning::
+
+        If this method is used on the root directory you will loose all your data, it's highly recommended to use a dry run first and carefully review the destroyed files.
+
+    Args:
+        asset_id: the Id of the asset or a folder
+        dry_run: whether or not a dry run should be launched. dry run will only display the files name without deleting them.
+
+    Returns:
+        a list of all the files deleted or to be deleted
+    """
+    asset_id = str(asset_id)
+    # define a delete function to change the behaviour of the method depending of the mode
+    # in dry mode, the function only store the assets to be destroyed as a dictionary.
+    # in non dry mode, the function store the asset names in a dictionary AND delete them.
+    output = []
+
+    def delete(id: str):
+        output.append(id)
+        dry_run is True or ee.data.deleteAsset(id)
+
+    # identify the type of asset
+    asset_info = ee.data.getAsset(asset_id)
+
+    if asset_info["type"] == "FOLDER":
+
+        # get all the assets
+        asset_list = get_assets(folder=asset_id)
+
+        # split the files by nesting levels
+        # we will need to delete the more nested files first
+        assets_ordered: dict = {}
+        for asset in asset_list:
+            lvl = len(asset["id"].split("/"))
+            assets_ordered.setdefault(lvl, [])
+            assets_ordered[lvl].append(asset)
+
+        # delete all items starting from the more nested ones
+        assets_ordered = dict(sorted(assets_ordered.items(), reverse=True))
+        for lvl in assets_ordered:
+            for i in assets_ordered[lvl]:
+                delete(i["name"])
+
+    # delete the initial folder/asset
+    delete(asset_id)
+
+    return output
