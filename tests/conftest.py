@@ -11,14 +11,17 @@ def pytest_configure():
 
 
 @pytest.fixture(scope="session")
-def test_folder(gee_hash):
+def test_folder(gee_hash, account_root):
     """Create a test folder for the test session."""
+    point = ee.Geometry.Point([0, 0])
     structure = {
         "folder": {
-            "image": ee.Image(1),
-            "fc": ee.FeatureCollection(ee.Geometry.Point([0, 0])),
+            "image": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
+            "fc": ee.FeatureCollection(point),
         }
     }
-    folder = pytest_gee.init_tree(structure, gee_hash)
+    folder = pytest_gee.init_tree(structure, gee_hash, account_root)
 
-    return folder
+    yield folder
+
+    pytest_gee.delete_assets(folder, False)

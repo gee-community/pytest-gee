@@ -57,7 +57,7 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
     return utils.wait(task, timeout)
 
 
-def delete_assets(asset_id: str, dry_run: bool = True) -> list:
+def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     """Delete the selected asset and all its content.
 
     This method will delete all the files and folders existing in an asset folder.
@@ -75,6 +75,7 @@ def delete_assets(asset_id: str, dry_run: bool = True) -> list:
     Returns:
         a list of all the files deleted or to be deleted
     """
+    asset_id = str(asset_id)
     # define a delete function to change the behaviour of the method depending of the mode
     # in dry mode, the function only store the assets to be destroyed as a dictionary.
     # in non dry mode, the function store the asset names in a dictionary AND delete them.
@@ -94,7 +95,7 @@ def delete_assets(asset_id: str, dry_run: bool = True) -> list:
 
         # split the files by nesting levels
         # we will need to delete the more nested files first
-        assets_ordered = {}
+        assets_ordered: dict = {}
         for asset in asset_list:
             lvl = len(asset["id"].split("/"))
             assets_ordered.setdefault(lvl, [])
@@ -149,9 +150,9 @@ def init_tree(structure: dict, prefix: str, account_root: str) -> Path:
     # create the root folder
     account_root = ee.data.getAssetRoots()[0]["id"]
     root_folder = f"{account_root}/{prefix}"
-    root_folder = ee.data.createAsset({"type": "FOLDER"}, root_folder)
+    ee.data.createAsset({"type": "FOLDER"}, root_folder)
 
     # start the recursive function
-    _recursive_create(structure, prefix)
+    _recursive_create(structure, prefix, root_folder)
 
     return Path(root_folder)

@@ -6,19 +6,19 @@
 """
 from __future__ import annotations
 
-from datetime import time
+import time
 from pathlib import Path
 from typing import List, Optional, Union
 
 import ee
 
 
-def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
+def wait(task: Union[ee.batch.Task, str], timeout: int = 60) -> str:
     """Wait until the selected process is finished or we reached timeout value.
 
     Args:
         task: name of the running task or the Task object itself.
-        timeout: timeout in seconds. if set to 0 the parameter is ignored. default to 5 minutes.
+        timeout: timeout in seconds. if set to 0 the parameter is ignored. default to 1 minutes.
 
     Returns:
         the final state of the task
@@ -28,6 +28,7 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
 
     # init both the task object and the state
     task = task if isinstance(task, ee.batch.Task) else get_task(task)
+    assert task is not None, "The task is not found"
     state = "UNSUBMITTED"
 
     # loop every 5s to check the task state. This is blocking the Python interpreter
@@ -69,7 +70,7 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
         the asset list. each asset is a dict with 3 keys: 'type', 'name' and 'id'
     """
     # set the folder and init the list
-    asset_list = []
+    asset_list: list = []
     folder = str(folder)
 
     # recursive function to get all the assets
@@ -102,16 +103,16 @@ def export_asset(object: ee.ComputedObject, asset_id: Union[str, Path]) -> Path:
         )
     elif isinstance(object, ee.Image):
         task = ee.batch.Export.image.toAsset(
+            region=object.geometry(),
             image=object,
             description=asset_id.stem,
             assetId=str(asset_id),
-            bestEffort=True,
         )
     else:
         raise ValueError("Only ee.Image and ee.FeatureCollection are supported")
 
     # launch the task and wait for the end of exportation
     task.start()
-    wait(task)
+    wait(asset_id.stem)
 
     return asset_id

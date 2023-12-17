@@ -19,6 +19,7 @@ def test_init_tree(gee_hash, account_root, test_folder):
     """Test the init_tree function."""
     # search all the assets contained in the test_folder
     asset_list = pytest_gee.utils.get_assets(account_root)
+    asset_list = [i["name"] for i in asset_list]
 
     # identify specific files and folders
     folder = test_folder / f"{gee_hash}_folder"
