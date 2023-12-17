@@ -140,12 +140,13 @@ def init_tree(structure: dict, prefix: str, account_root: str) -> Path:
     # recursive function to create the folder tree
     def _recursive_create(structure, prefix, folder):
         for name, content in structure.items():
+            asset_id = Path(folder) / name
+            description = f"{prefix}_{name}"
             if isinstance(content, dict):
-                loc_folder = f"{folder}/{prefix}_{name}"
-                ee.data.createAsset({"type": "FOLDER"}, loc_folder)
-                _recursive_create(content, prefix, loc_folder)
+                ee.data.createAsset({"type": "FOLDER"}, str(asset_id))
+                _recursive_create(content, prefix, asset_id)
             else:
-                utils.export_asset(content, Path(folder) / f"{prefix}_{name}")
+                utils.export_asset(content, asset_id, description)
 
     # create the root folder
     account_root = ee.data.getAssetRoots()[0]["id"]

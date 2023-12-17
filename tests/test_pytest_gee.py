@@ -15,16 +15,16 @@ def test_gee_init():
     assert ee.Number(1).getInfo() == 1
 
 
-def test_init_tree(gee_hash, account_root, test_folder):
+def test_init_tree(account_root, test_folder):
     """Test the init_tree function."""
     # search all the assets contained in the test_folder
     asset_list = pytest_gee.utils.get_assets(account_root)
     asset_list = [i["name"] for i in asset_list]
 
     # identify specific files and folders
-    folder = test_folder / f"{gee_hash}_folder"
-    image = folder / f"{gee_hash}_image"
-    feature_collection = folder / f"{gee_hash}_fc"
+    folder = test_folder / "folder"
+    image = folder / "image"
+    feature_collection = folder / "fc"
 
     # check that they exist
     assert str(test_folder) in asset_list

@@ -84,12 +84,15 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
     return _recursive_get(folder, asset_list)
 
 
-def export_asset(object: ee.ComputedObject, asset_id: Union[str, Path]) -> Path:
+def export_asset(
+    object: ee.ComputedObject, asset_id: Union[str, Path], description: str
+) -> Path:
     """Export assets to the GEE platform, only working for very simple objects.
 
     ARgs:
         object: the object to export
         asset_id: the name of the asset to create
+        description: the description of the task
 
     Returns:
         the path of the created asset
@@ -98,14 +101,14 @@ def export_asset(object: ee.ComputedObject, asset_id: Union[str, Path]) -> Path:
     if isinstance(object, ee.FeatureCollection):
         task = ee.batch.Export.table.toAsset(
             collection=object,
-            description=asset_id.stem,
+            description=description,
             assetId=str(asset_id),
         )
     elif isinstance(object, ee.Image):
         task = ee.batch.Export.image.toAsset(
             region=object.geometry(),
             image=object,
-            description=asset_id.stem,
+            description=description,
             assetId=str(asset_id),
         )
     else:
@@ -113,6 +116,6 @@ def export_asset(object: ee.ComputedObject, asset_id: Union[str, Path]) -> Path:
 
     # launch the task and wait for the end of exportation
     task.start()
-    wait(asset_id.stem)
+    wait(description)
 
     return asset_id
