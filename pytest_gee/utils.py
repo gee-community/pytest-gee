@@ -159,7 +159,6 @@ def init_tree(structure: dict, prefix: str, root: str) -> PurePosixPath:
                 export_asset(content, asset_id, description)
 
     # create the root folder
-    root = ee.data.getAssetRoots()[0]["id"]
     root_folder = f"{root}/{prefix}"
     ee.data.createAsset({"type": "FOLDER"}, root_folder)
 
