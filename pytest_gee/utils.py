@@ -146,7 +146,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, Path]) -> PurePosix
         ...     },
         ... }
         ... init_tree(structure, "toto")
-    """ 
+    """
     # recursive function to create the folder tree
     def _recursive_create(structure, prefix, folder):
         for name, content in structure.items():
