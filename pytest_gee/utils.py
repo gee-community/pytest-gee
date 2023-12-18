@@ -60,7 +60,7 @@ def get_task(task_descripsion: str) -> Optional[ee.batch.Task]:
     return task
 
 
-def get_assets(folder: Union[str, PurePosixPath]) -> List[dict]:
+def get_assets(folder: Union[str, Path]) -> List[dict]:
     """Get all the assets from the parameter folder. every nested asset will be displayed.
 
     Args:
@@ -71,7 +71,7 @@ def get_assets(folder: Union[str, PurePosixPath]) -> List[dict]:
     """
     # set the folder and init the list
     asset_list: list = []
-    folder = str(folder)
+    folder = folder if isinstance(folder, str) else folder.as_posix()
 
     # recursive function to get all the assets
     def _recursive_get(folder, asset_list):
@@ -85,7 +85,7 @@ def get_assets(folder: Union[str, PurePosixPath]) -> List[dict]:
 
 
 def export_asset(
-    object: ee.ComputedObject, asset_id: Union[str, PurePosixPath], description: str
+    object: ee.ComputedObject, asset_id: Union[str, Path], description: str
 ) -> PurePosixPath:
     """Export assets to the GEE platform, only working for very simple objects.
 
@@ -97,18 +97,21 @@ def export_asset(
     Returns:
         the path of the created asset
     """
+    # convert the asset_id to a string note that GEE only supports unix style separator
+    asset_id = asset_id if isinstance(asset_id, str) else asset_id.as_posix()
+
     if isinstance(object, ee.FeatureCollection):
         task = ee.batch.Export.table.toAsset(
             collection=object,
             description=description,
-            assetId=str(asset_id),
+            assetId=asset_id,
         )
     elif isinstance(object, ee.Image):
         task = ee.batch.Export.image.toAsset(
             region=object.geometry(),
             image=object,
             description=description,
-            assetId=str(asset_id),
+            assetId=asset_id,
         )
     else:
         raise ValueError("Only ee.Image and ee.FeatureCollection are supported")
@@ -120,7 +123,7 @@ def export_asset(
     return PurePosixPath(asset_id)
 
 
-def init_tree(structure: dict, prefix: str, root: str) -> Path:
+def init_tree(structure: dict, prefix: str, root: str) -> PurePosixPath:
     """Create an EarthEngine folder tree from a dictionary.
 
     The input ditionary should described the structure of the folder you want to create.
@@ -166,7 +169,7 @@ def init_tree(structure: dict, prefix: str, root: str) -> Path:
     return PurePosixPath(root_folder)
 
 
-def delete_assets(asset_id: Union[str, PurePosixPath], dry_run: bool = True) -> list:
+def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     """Delete the selected asset and all its content.
 
     This method will delete all the files and folders existing in an asset folder.
@@ -185,7 +188,7 @@ def delete_assets(asset_id: Union[str, PurePosixPath], dry_run: bool = True) -> 
         a list of all the files deleted or to be deleted
     """
     # convert the asset_id to a string
-    asset_id = str(asset_id)
+    asset_id = asset_id if isinstance(asset_id, str) else asset_id.as_posix()
 
     # define a delete function to change the behaviour of the method depending of the mode
     # in dry mode, the function only store the assets to be destroyed as a dictionary.
