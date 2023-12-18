@@ -35,9 +35,11 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 60) -> str:
     start_time = time.time()
     while state != "COMPLETED" and time.time() - start_time < timeout:
         time.sleep(5)
-        state = task.state
+        state = task.status()["state"]
         if state == "FAILED":
             break
+        if state == "COMPLETED":
+            print("I found the finished operation")
 
     return state
 
@@ -97,7 +99,6 @@ def export_asset(
     Returns:
         the path of the created asset
     """
-    asset_id = Path(asset_id)
     if isinstance(object, ee.FeatureCollection):
         task = ee.batch.Export.table.toAsset(
             collection=object,
@@ -118,7 +119,7 @@ def export_asset(
     task.start()
     wait(description)
 
-    return asset_id
+    return Path(asset_id)
 
 
 def init_tree(structure: dict, prefix: str, root: str) -> Path:
