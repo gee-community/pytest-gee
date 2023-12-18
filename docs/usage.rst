@@ -129,6 +129,15 @@ Specifically for ``ee.Image`` objects, please use the ``clipToBoundsAndScale`` m
             }
         }
 
+Which will render in your GEE account as:
+
+.. code-block::
+
+    8d98a5be574041a6a54d6def9d915c67/
+    └── folder/
+        ├── fc (FeatureCollection)
+        └── image (ImageCollection)
+
 Customize the root folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
