@@ -1,9 +1,14 @@
 """The init file of the package."""
+from __future__ import annotations
+
 import os
 from pathlib import Path
+from typing import Union
 
 import ee
 import httplib2
+
+from pytest_gee import utils
 
 __version__ = "0.2.0"
 __author__ = "Pierrick Rambaud"
@@ -35,3 +40,18 @@ def init_ee_from_token():
     # if the user is in local development the authentication should
     # already be available
     ee.Initialize(http_transport=httplib2.Http())
+
+
+def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
+    """Wait until the selected process is finished or we reached timeout value.
+
+    Args:
+        task: name of the running task or the Task object itself.
+        timeout: timeout in seconds. if set to 0 the parameter is ignored. default to 5 minutes.
+
+    Returns:
+        the final state of the task
+    """
+    # just expose the utils function
+    # this is compulsory as wait is also needed in the utils module
+    return utils.wait(task, timeout)
