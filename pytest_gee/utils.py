@@ -7,7 +7,7 @@
 from __future__ import annotations
 
 import time
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
 
 import ee
@@ -38,8 +38,6 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 60) -> str:
         state = task.status()["state"]
         if state == "FAILED":
             break
-        if state == "COMPLETED":
-            print("I found the finished operation")
 
     return state
 
@@ -62,7 +60,7 @@ def get_task(task_descripsion: str) -> Optional[ee.batch.Task]:
     return task
 
 
-def get_assets(folder: Union[str, Path]) -> List[dict]:
+def get_assets(folder: Union[str, PurePosixPath]) -> List[dict]:
     """Get all the assets from the parameter folder. every nested asset will be displayed.
 
     Args:
@@ -87,8 +85,8 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
 
 
 def export_asset(
-    object: ee.ComputedObject, asset_id: Union[str, Path], description: str
-) -> Path:
+    object: ee.ComputedObject, asset_id: Union[str, PurePosixPath], description: str
+) -> PurePosixPath:
     """Export assets to the GEE platform, only working for very simple objects.
 
     ARgs:
@@ -119,7 +117,7 @@ def export_asset(
     task.start()
     wait(description)
 
-    return Path(asset_id)
+    return PurePosixPath(asset_id)
 
 
 def init_tree(structure: dict, prefix: str, root: str) -> Path:
@@ -149,7 +147,7 @@ def init_tree(structure: dict, prefix: str, root: str) -> Path:
     # recursive function to create the folder tree
     def _recursive_create(structure, prefix, folder):
         for name, content in structure.items():
-            asset_id = Path(folder) / name
+            asset_id = PurePosixPath(folder) / name
             description = f"{prefix}_{name}"
             if isinstance(content, dict):
                 ee.data.createAsset({"type": "FOLDER"}, str(asset_id))
@@ -165,10 +163,10 @@ def init_tree(structure: dict, prefix: str, root: str) -> Path:
     # start the recursive function
     _recursive_create(structure, prefix, root_folder)
 
-    return Path(root_folder)
+    return PurePosixPath(root_folder)
 
 
-def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
+def delete_assets(asset_id: Union[str, PurePosixPath], dry_run: bool = True) -> list:
     """Delete the selected asset and all its content.
 
     This method will delete all the files and folders existing in an asset folder.
@@ -186,7 +184,9 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     Returns:
         a list of all the files deleted or to be deleted
     """
+    # convert the asset_id to a string
     asset_id = str(asset_id)
+
     # define a delete function to change the behaviour of the method depending of the mode
     # in dry mode, the function only store the assets to be destroyed as a dictionary.
     # in non dry mode, the function store the asset names in a dictionary AND delete them.

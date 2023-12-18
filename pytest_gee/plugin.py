@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import uuid
+from pathlib import PurePosixPath
 
 import ee
 import pytest
@@ -18,7 +19,7 @@ def gee_hash():
 @pytest.fixture(scope="session")
 def gee_folder_root():
     """Link to the root folder of the connected account."""
-    return ee.data.getAssetRoots()[0]["id"]
+    return PurePosixPath(ee.data.getAssetRoots()[0]["id"])
 
 
 @pytest.fixture(scope="session")
