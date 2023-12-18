@@ -123,7 +123,7 @@ def export_asset(
     return PurePosixPath(asset_id)
 
 
-def init_tree(structure: dict, prefix: str, root: str) -> PurePosixPath:
+def init_tree(structure: dict, prefix: str, root: Union[str, Path]) -> PurePosixPath:
     """Create an EarthEngine folder tree from a dictionary.
 
     The input ditionary should described the structure of the folder you want to create.
@@ -146,7 +146,7 @@ def init_tree(structure: dict, prefix: str, root: str) -> PurePosixPath:
         ...     },
         ... }
         ... init_tree(structure, "toto")
-    """
+    """ 
     # recursive function to create the folder tree
     def _recursive_create(structure, prefix, folder):
         for name, content in structure.items():
@@ -159,7 +159,8 @@ def init_tree(structure: dict, prefix: str, root: str) -> PurePosixPath:
                 export_asset(content, asset_id, description)
 
     # create the root folder
-    root_folder = f"{root}/{prefix}"
+    root = root if isinstance(root, str) else PurePosixPath(root)
+    root_folder = f"{root.as_posix()}/{prefix}"
     ee.data.createAsset({"type": "FOLDER"}, root_folder)
 
     # start the recursive function
