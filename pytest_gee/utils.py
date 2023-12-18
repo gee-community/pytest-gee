@@ -13,7 +13,7 @@ from typing import List, Optional, Union
 import ee
 
 
-def wait(task: Union[ee.batch.Task, str], timeout: int = 60) -> str:
+def wait(task: Union[ee.batch.Task, str], timeout: int = 10 * 60) -> str:
     """Wait until the selected process is finished or we reached timeout value.
 
     Args:
