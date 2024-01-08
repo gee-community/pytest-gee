@@ -47,8 +47,8 @@ gee = "pytest_gee.plugin"
 test = [
   "pytest",
   "pytest-sugar",
-  "pytest-cov",
-  "pytest-deadfixtures"
+  "pytest-deadfixtures",
+  "coverage",
 ]
 doc = [
   "sphinx>=6.2.1",
