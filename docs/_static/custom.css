@@ -7,9 +7,9 @@ div.highlight-console pre span.go::before {
 
 /* custom colors for titles */
 html[data-theme="light"] {
-  --pst-color-primary: #1A73E8;
+  --pst-color-primary: #1a73e8;
 }
 
 html[data-theme="dark"] {
-  --pst-color-primary: #1A73E8;
+  --pst-color-primary: #1a73e8;
 }
