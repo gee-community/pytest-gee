@@ -27,7 +27,7 @@ pytest-gee
     :alt: PyPI version
 
 .. image:: https://img.shields.io/conda/vn/conda-forge/pytest-gee?logo=anaconda&logoColor=white&color=blue
-    :target: https://anaconda.org/conda-forge/jupyter-sphinx
+    :target: https://anaconda.org/conda-forge/pytest-gee
     :alt: conda-forge version badge
 
 .. image:: https://img.shields.io/github/actions/workflow/status/gee-community/pytest-gee/unit.yaml?logo=github&logoColor=white
