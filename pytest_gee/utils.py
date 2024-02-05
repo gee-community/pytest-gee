@@ -123,9 +123,7 @@ def export_asset(
     return PurePosixPath(asset_id)
 
 
-def init_tree(
-    structure: dict, prefix: str, root: Union[str, PurePosixPath]
-) -> PurePosixPath:
+def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> PurePosixPath:
     """Create an EarthEngine folder tree from a dictionary.
 
     The input ditionary should described the structure of the folder you want to create.
