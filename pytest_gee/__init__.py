@@ -1,7 +1,9 @@
 """The init file of the package."""
 from __future__ import annotations
 
+import json
 import os
+import tempfile
 from pathlib import Path
 from typing import Union
 
@@ -40,6 +42,38 @@ def init_ee_from_token():
     # if the user is in local development the authentication should
     # already be available
     ee.Initialize(http_transport=httplib2.Http())
+
+
+def init_ee_from_service_account():
+    """Initialize earth engine according using a service account.
+
+    The environment used to run the tests need to have a EARTHENGINE_SERVICE_ACCOUNT variable.
+    The content of this variable must be the copy of a personal credential file that you can generate from the google cloud console.
+
+    Note:
+        As all init method of ``pytest-gee``, this method will fallback to a regular ``ee.Initialize`` using the ``EARTHENGINE_PROJECT`` environment variable.
+    """
+    if "EARTHENGINE_SERVICE_ACCOUNT" in os.environ:
+        # extract the environment variables data
+        private_key = os.environ["EARTHENGINE_SERVICE_ACCOUNT"]
+        ee_user = json.loads(private_key)["client_email"]
+
+        # connect to GEE using a temp file to avoid writing the key to disk
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file = Path(temp_dir) / "private_key.json"
+            file.write_text(private_key)
+            credentials = ee.ServiceAccountCredentials(ee_user, str(file))
+            ee.Initialize(credentials=credentials, http_transport=httplib2.Http())
+
+    elif "EARTHENGINE_PROJECT" in os.environ:
+        # if the user is in local development the authentication should already be available
+        # we simply need to use the provided project name
+        ee.Initialize(project=os.environ["EARTHENGINE_PROJECT"], http_transport=httplib2.Http())
+
+    else:
+        raise ValueError(
+            "EARTHENGINE_SERVICE_ACCOUNT or EARTHENGINE_PROJECT environment variable is missing"
+        )
 
 
 def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:

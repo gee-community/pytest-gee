@@ -19,7 +19,8 @@ def gee_hash():
 @pytest.fixture(scope="session")
 def gee_folder_root():
     """Link to the root folder of the connected account."""
-    return Path(ee.data.getAssetRoots()[0]["id"])
+    project_id = ee.data._cloud_api_user_project
+    return Path(f"projects/{project_id}/assets")
 
 
 @pytest.fixture(scope="session")
