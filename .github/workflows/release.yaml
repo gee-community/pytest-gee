@@ -4,6 +4,10 @@ on:
   release:
     types: [created]
 
+env:
+  EARTHENGINE_SERVICE_ACCOUNT: ${{ secrets.EARTHENGINE_SERVICE_ACCOUNT }}
+  EARTHENGINE_PROJECT: ${{ secrets.EARTHENGINE_PROJECT }}
+
 jobs:
   tests:
     uses: ./.github/workflows/unit.yaml
