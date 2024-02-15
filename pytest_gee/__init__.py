@@ -12,7 +12,7 @@ import httplib2
 
 from pytest_gee import utils
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 __author__ = "Pierrick Rambaud"
 __email__ = "pierrick.rambaud49@gmail.com"
 
