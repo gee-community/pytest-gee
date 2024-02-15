@@ -18,7 +18,7 @@ def pytest_configure():
 @pytest.fixture(scope="session")
 def gee_folder_root():
     """Link to the root folder of the connected account."""
-    project_id = os.environ.get("EARTHENGINE_PROJECT") or ee.data._cloud_api_user_project
+    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
     if project_id is None:
         raise ValueError(
             "The project name cannot be detected."

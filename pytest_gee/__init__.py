@@ -39,9 +39,16 @@ def init_ee_from_token():
         credential_file_path = credential_folder_path / "credentials"
         credential_file_path.write_text(ee_token)
 
+    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
+    if project_id is None:
+        raise ValueError(
+            "The project name cannot be detected."
+            "Please set the EARTHENGINE_PROJECT environment variable."
+        )
+
     # if the user is in local development the authentication should
     # already be available
-    ee.Initialize(http_transport=httplib2.Http())
+    ee.Initialize(project=project_id, http_transport=httplib2.Http())
 
 
 def init_ee_from_service_account():
