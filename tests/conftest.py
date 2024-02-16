@@ -13,7 +13,8 @@ def pytest_configure():
     if os.getenv("EARTHENGINE_SERVICE_ACCOUNT"):
         pytest_gee.init_ee_from_service_account()
 
-    pytest_gee.init_ee_from_token()
+    if os.getenv("EARTHENGINE_TOKEN"):
+        pytest_gee.init_ee_from_token()
 
 
 @pytest.fixture(scope="session")
