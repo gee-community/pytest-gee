@@ -1,4 +1,5 @@
 """A pytest plugin to build a GEE environment for a test session."""
+
 from __future__ import annotations
 
 import os

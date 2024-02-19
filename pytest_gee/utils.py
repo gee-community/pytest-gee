@@ -4,6 +4,7 @@
 
     This module is for internal use only and should not be used directly.
 """
+
 from __future__ import annotations
 
 import time
@@ -89,7 +90,7 @@ def export_asset(
 ) -> PurePosixPath:
     """Export assets to the GEE platform, only working for very simple objects.
 
-    ARgs:
+    Args:
         object: the object to export
         asset_id: the name of the asset to create
         description: the description of the task
@@ -147,6 +148,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> 
         ... }
         ... init_tree(structure, "toto")
     """
+
     # recursive function to create the folder tree
     def _recursive_create(structure, prefix, folder):
         for name, content in structure.items():
