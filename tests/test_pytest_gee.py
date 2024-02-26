@@ -16,6 +16,7 @@ def test_hash_fixture(gee_hash):
     assert len(gee_hash) == 32
 
 
+@pytest.mark.skipif("EARTHENGINE_TOKEN" not in os.environ, reason="requires EARTHENGINE_TOKEN")
 def test_gee_init_from_token():
     """Test the init_ee_from_token function."""
     credentials_filepath = Path(ee.oauth.get_credentials_path())
