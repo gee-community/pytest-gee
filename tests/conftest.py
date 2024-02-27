@@ -1,5 +1,7 @@
 """Pytest session configuration."""
 
+import os
+
 import ee
 import pytest
 
@@ -8,7 +10,11 @@ import pytest_gee
 
 def pytest_configure():
     """Init GEE in the test environment."""
-    pytest_gee.init_ee_from_service_account()
+    if os.getenv("EARTHENGINE_SERVICE_ACCOUNT"):
+        pytest_gee.init_ee_from_service_account()
+
+    if os.getenv("EARTHENGINE_TOKEN"):
+        pytest_gee.init_ee_from_token()
 
 
 @pytest.fixture(scope="session")
