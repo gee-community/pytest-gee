@@ -153,7 +153,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> 
             asset_id = PurePosixPath(folder) / name
             description = f"{prefix}_{name}"
             if isinstance(content, dict):
-                ee.data.createAsset({"type": "FOLDER"}, str(asset_id))
+                ee.data.createFolder(str(asset_id))
                 _recursive_create(content, prefix, asset_id)
             else:
                 export_asset(content, asset_id, description)
@@ -161,7 +161,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> 
     # create the root folder
     root = PurePosixPath(root) if isinstance(root, str) else root
     root_folder = f"{root.as_posix()}/{prefix}"
-    ee.data.createAsset({"type": "FOLDER"}, root_folder)
+    ee.data.createFolder(root_folder)
 
     # start the recursive function
     _recursive_create(structure, prefix, root_folder)

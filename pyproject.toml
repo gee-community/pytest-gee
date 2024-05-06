@@ -22,7 +22,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
   "deprecated>=1.2.14",
-  "earthengine-api",
+  "earthengine-api>=0.1.397", # new ee.data.createFolder method
   "pytest",
 ]
 
