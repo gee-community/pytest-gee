@@ -9,8 +9,8 @@ from typing import Union
 
 import ee
 import httplib2
-
-from pytest_gee import utils
+from deprecated.sphinx import deprecated
+from ee.cli.utils import wait_for_task
 
 __version__ = "0.3.4"
 __author__ = "Pierrick Rambaud"
@@ -83,6 +83,7 @@ def init_ee_from_service_account():
         )
 
 
+@deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
 def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
     """Wait until the selected process is finished or we reached timeout value.
 
@@ -95,4 +96,4 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
     """
     # just expose the utils function
     # this is compulsory as wait is also needed in the utils module
-    return utils.wait(task, timeout)
+    return wait_for_task(task.id, timeout, log_progress=False)
