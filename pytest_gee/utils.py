@@ -123,7 +123,7 @@ def _create_container(asset_request: str) -> str:
     # deprecation management for older version of the lib
     parts = asset_request.split("::")
     if len(parts) == 1:
-        parts.append("FOLDER")
+        parts.append("Folder")
         warn(f"Asset {asset_request} is not specifying asset Type, it will be created as a FOLDER.")
 
     # extract the asset_id and the asset_type from the different parts
