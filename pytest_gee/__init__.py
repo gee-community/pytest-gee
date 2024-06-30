@@ -12,7 +12,7 @@ import httplib2
 from deprecated.sphinx import deprecated
 from ee.cli.utils import wait_for_task
 
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 __author__ = "Pierrick Rambaud"
 __email__ = "pierrick.rambaud49@gmail.com"
 
