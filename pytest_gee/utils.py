@@ -79,7 +79,7 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
     def _recursive_get(folder, asset_list):
         for asset in ee.data.listAssets({"parent": folder})["assets"]:
             asset_list.append(asset)
-            if asset["type"] == "FOLDER":
+            if asset["type"] in ["FOLDER", "IMAGE_COLLECTION"]:
                 asset_list = _recursive_get(asset["name"], asset_list)
         return asset_list
 
@@ -145,10 +145,8 @@ def _create_container(asset_request: str) -> str:
     asset_id, asset_type = parts[:2]
 
     # create the container
-    if asset_type == "FOLDER":
-        ee.data.createFolder(asset_id)
-    elif asset_type == "IMAGE_COLLECTION":
-        ee.data.createAsset(asset_id, {"type": "IMAGE_COLLECTION"})
+    if asset_type in ["Folder", "ImageCollection"]:
+        ee.data.createAsset({"type": asset_type}, asset_id)
     else:
         raise ValueError(f"Asset type {asset_type} is not supported.")
 
@@ -234,7 +232,7 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     # identify the type of asset
     asset_info = ee.data.getAsset(asset_id)
 
-    if asset_info["type"] == "FOLDER":
+    if asset_info["type"] in ["FOLDER", "IMAGE_COLLECTION"]:
 
         # get all the assets
         asset_list = get_assets(folder=asset_id)
@@ -249,6 +247,7 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
 
         # delete all items starting from the more nested ones
         assets_ordered = dict(sorted(assets_ordered.items(), reverse=True))
+        print(assets_ordered)
         for lvl in assets_ordered:
             for i in assets_ordered[lvl]:
                 delete(i["name"])

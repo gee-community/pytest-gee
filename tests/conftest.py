@@ -16,8 +16,12 @@ def gee_folder_structure():
     """Override the default test folder structure."""
     point = ee.Geometry.Point([0, 0])
     return {
-        "folder": {
+        "folder::Folder": {
             "image": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
             "fc": ee.FeatureCollection(point),
-        }
+        },
+        "ic::ImageCollection": {
+            "image1": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
+            "image2": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
+        },
     }

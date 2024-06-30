@@ -18,9 +18,12 @@ def test_gee_init():
 def test_structure(gee_folder_structure):
     """Test the structure fixture."""
     assert isinstance(gee_folder_structure, dict)
-    assert "folder" in gee_folder_structure
-    assert "image" in gee_folder_structure["folder"]
-    assert "fc" in gee_folder_structure["folder"]
+    assert "folder::Folder" in gee_folder_structure
+    assert "image" in gee_folder_structure["folder::Folder"]
+    assert "fc" in gee_folder_structure["folder::Folder"]
+    assert "ic::ImageCollection" in gee_folder_structure
+    assert "image1" in gee_folder_structure["ic::ImageCollection"]
+    assert "image2" in gee_folder_structure["ic::ImageCollection"]
 
 
 def test_init_tree(gee_folder_root, gee_test_folder):
