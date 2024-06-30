@@ -9,8 +9,10 @@ from __future__ import annotations
 import time
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
+from warnings import warn
 
 import ee
+import ee.data
 
 
 def wait(task: Union[ee.batch.Task, str], timeout: int = 10 * 60) -> str:
@@ -123,6 +125,36 @@ def export_asset(
     return PurePosixPath(asset_id)
 
 
+def _create_container(asset_request: str) -> str:
+    """Create a container for the asset request depending on the requested type.
+
+    Args:
+        asset_request: the asset request specifying the type of asset to create. Convention is <asset_id>::<asset_type>
+
+    Returns:
+        the asset_id of the container
+    """
+    # deprecation management for older version of the lib
+    parts = asset_request.split("::")
+    if len(parts) == 1:
+        parts.append("FOLDER")
+        warn(f"Asset {asset_request} is not specifying asset Type, it will be created as a FOLDER.")
+
+    # extract the asset_id and the asset_type from the different parts
+    # if more than 2 splits are identified they will be ignored
+    asset_id, asset_type = parts[:2]
+
+    # create the container
+    if asset_type == "FOLDER":
+        ee.data.createFolder(asset_id)
+    elif asset_type == "IMAGE_COLLECTION":
+        ee.data.createAsset(asset_id, {"type": "IMAGE_COLLECTION"})
+    else:
+        raise ValueError(f"Asset type {asset_type} is not supported.")
+
+    return asset_id
+
+
 def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> PurePosixPath:
     """Create an EarthEngine folder tree from a dictionary.
 
@@ -153,7 +185,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> 
             asset_id = PurePosixPath(folder) / name
             description = f"{prefix}_{name}"
             if isinstance(content, dict):
-                ee.data.createFolder(str(asset_id))
+                asset_id = _create_container(str(asset_id))
                 _recursive_create(content, prefix, asset_id)
             else:
                 export_asset(content, asset_id, description)
