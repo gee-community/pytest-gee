@@ -169,7 +169,8 @@ By default the test folder tree is empty and will be deleted at the end of the t
 You can decide to populate it with some assets that will be used in your tests.
 
 To do so customize the ``gee_folder_structure`` fixture in your ``conftest.py`` file.
-This fixture is a ``dict`` that will be used to create the folder tree in GEE. As shown in the following example you can add subfolder and assets to this tree.
+This fixture is a ``dict`` that will be used to create the folder tree in GEE.
+First you can create containers assets (namely folders or image collections) to store your assets. These container are simply marked as keys in the dict and specify their types after a "::" symbol as shown in the following example.
 assets need to be ``ee.Image`` or ``ee.FeatureCollection`` objects and remain small as the creation operation is taken care of by the plugin.
 Specifically for ``ee.Image`` objects, please use the ``clipToBoundsAndScale`` method to make sure the asset has a geometry and a scale.
 
@@ -184,9 +185,13 @@ Specifically for ``ee.Image`` objects, please use the ``clipToBoundsAndScale`` m
         """Override the default test folder structure."""
         point = ee.Geometry.Point([0, 0])
         return {
-            "folder": {
+            "folder::Folder": {
                 "image": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
                 "fc": ee.FeatureCollection(point),
+            },
+            "image_collection::ImageCollection": {
+                "image1": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
+                "image2": ee.Image(1).clipToBoundsAndScale(point.buffer(100), scale=30),
             }
         }
 
@@ -197,7 +202,10 @@ Which will render in your GEE account as:
     8d98a5be574041a6a54d6def9d915c67/
     └── folder/
         ├── fc (FeatureCollection)
-        └── image (ImageCollection)
+        └── image (Image)
+    └── image_collection/ (ImageCollection)
+        ├── image1 (Image)
+        └── image2 (Image)
 
 Customize the root folder
 ^^^^^^^^^^^^^^^^^^^^^^^^^

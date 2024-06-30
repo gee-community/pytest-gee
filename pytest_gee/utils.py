@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
+from warnings import warn
 
 import ee
 from deprecated.sphinx import deprecated
@@ -64,7 +65,7 @@ def get_assets(folder: Union[str, Path]) -> List[dict]:
     def _recursive_get(folder, asset_list):
         for asset in ee.data.listAssets({"parent": folder})["assets"]:
             asset_list.append(asset)
-            if asset["type"] == "FOLDER":
+            if asset["type"] in ["FOLDER", "IMAGE_COLLECTION"]:
                 asset_list = _recursive_get(asset["name"], asset_list)
         return asset_list
 
@@ -110,6 +111,34 @@ def export_asset(
     return PurePosixPath(asset_id)
 
 
+def _create_container(asset_request: str) -> str:
+    """Create a container for the asset request depending on the requested type.
+
+    Args:
+        asset_request: the asset request specifying the type of asset to create. Convention is <asset_id>::<asset_type>
+
+    Returns:
+        the asset_id of the container
+    """
+    # deprecation management for older version of the lib
+    parts = asset_request.split("::")
+    if len(parts) == 1:
+        parts.append("FOLDER")
+        warn(f"Asset {asset_request} is not specifying asset Type, it will be created as a FOLDER.")
+
+    # extract the asset_id and the asset_type from the different parts
+    # if more than 2 splits are identified they will be ignored
+    asset_id, asset_type = parts[:2]
+
+    # create the container
+    if asset_type in ["Folder", "ImageCollection"]:
+        ee.data.createAsset({"type": asset_type}, asset_id)
+    else:
+        raise ValueError(f"Asset type {asset_type} is not supported.")
+
+    return asset_id
+
+
 def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> PurePosixPath:
     """Create an EarthEngine folder tree from a dictionary.
 
@@ -140,7 +169,7 @@ def init_tree(structure: dict, prefix: str, root: Union[str, PurePosixPath]) -> 
             asset_id = PurePosixPath(folder) / name
             description = f"{prefix}_{name}"
             if isinstance(content, dict):
-                ee.data.createFolder(str(asset_id))
+                asset_id = _create_container(str(asset_id))
                 _recursive_create(content, prefix, asset_id)
             else:
                 export_asset(content, asset_id, description)
@@ -189,7 +218,7 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     # identify the type of asset
     asset_info = ee.data.getAsset(asset_id)
 
-    if asset_info["type"] == "FOLDER":
+    if asset_info["type"] in ["FOLDER", "IMAGE_COLLECTION"]:
 
         # get all the assets
         asset_list = get_assets(folder=asset_id)
@@ -204,6 +233,7 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
 
         # delete all items starting from the more nested ones
         assets_ordered = dict(sorted(assets_ordered.items(), reverse=True))
+        print(assets_ordered)
         for lvl in assets_ordered:
             for i in assets_ordered[lvl]:
                 delete(i["name"])
