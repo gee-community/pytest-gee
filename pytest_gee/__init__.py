@@ -96,4 +96,5 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 5 * 60) -> str:
     """
     # just expose the utils function
     # this is compulsory as wait is also needed in the utils module
-    return wait_for_task(task.id, timeout, log_progress=False)
+    task_id = task.id if isinstance(task, ee.batch.Task) else task
+    return wait_for_task(task_id, timeout, log_progress=False)
