@@ -6,13 +6,15 @@
 """
 from __future__ import annotations
 
-import time
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
 
 import ee
+from deprecated.sphinx import deprecated
+from ee.cli.utils import wait_for_task
 
 
+@deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
 def wait(task: Union[ee.batch.Task, str], timeout: int = 10 * 60) -> str:
     """Wait until the selected process is finished or we reached timeout value.
 
@@ -23,23 +25,8 @@ def wait(task: Union[ee.batch.Task, str], timeout: int = 10 * 60) -> str:
     Returns:
         the final state of the task
     """
-    # give 5 seconds of delay to GEE to make sure the task is created
-    time.sleep(5)
-
-    # init both the task object and the state
-    task = task if isinstance(task, ee.batch.Task) else get_task(task)
-    assert task is not None, "The task is not found"
-    state = "UNSUBMITTED"
-
-    # loop every 5s to check the task state. This is blocking the Python interpreter
-    start_time = time.time()
-    while state != "COMPLETED" and time.time() - start_time < timeout:
-        time.sleep(5)
-        state = task.status()["state"]
-        if state == "FAILED":
-            break
-
-    return state
+    task_id = task.id if isinstance(task, ee.batch.Task) else task
+    return wait_for_task(task_id, timeout, log_progress=False)
 
 
 def get_task(task_descripsion: str) -> Optional[ee.batch.Task]:
@@ -118,7 +105,7 @@ def export_asset(
 
     # launch the task and wait for the end of exportation
     task.start()
-    wait(description)
+    wait_for_task(task.id, 10 * 60, False)
 
     return PurePosixPath(asset_id)
 
