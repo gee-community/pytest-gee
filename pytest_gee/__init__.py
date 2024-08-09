@@ -1,4 +1,5 @@
 """The init file of the package."""
+
 from __future__ import annotations
 
 import json
@@ -30,20 +31,27 @@ def init_ee_from_token():
     Note:
         As all init method of pytest-gee, this method will fallback to a regular ``ee.Initialize()`` if the environment variable is not found e.g. on your local computer.
     """
-    if "EARTHENGINE_TOKEN" in os.environ:
+    credential_folder_path = Path.home() / ".config" / "earthengine"
+    credential_file_path = credential_folder_path / "credentials"
+
+    if "EARTHENGINE_TOKEN" in os.environ and not credential_file_path.exists():
 
         # write the token to the appropriate folder
         ee_token = os.environ["EARTHENGINE_TOKEN"]
-        credential_folder_path = Path.home() / ".config" / "earthengine"
         credential_folder_path.mkdir(parents=True, exist_ok=True)
-        credential_file_path = credential_folder_path / "credentials"
         credential_file_path.write_text(ee_token)
 
-    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
-    if project_id is None:
-        raise ValueError(
-            "The project name cannot be detected."
-            "Please set the EARTHENGINE_PROJECT environment variable."
+    # Extract the project name from credentials
+    _credentials = json.loads(credential_file_path.read_text())
+    project_id = os.environ.get(
+        "EARTHENGINE_PROJECT", _credentials.get("project_id", _credentials.get("project", None))
+    )
+
+    if not project_id:
+        raise NameError(
+            "The project name cannot be detected. "
+            "Please set the EARTHENGINE_PROJECT environment variable. "
+            "Or authenticate using `earthengine set_project project_name`."
         )
 
     # if the user is in local development the authentication should
