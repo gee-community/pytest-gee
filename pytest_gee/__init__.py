@@ -70,14 +70,21 @@ def init_ee_from_service_account():
         As all init method of ``pytest-gee``, this method will fallback to a regular ``ee.Initialize`` using the ``EARTHENGINE_PROJECT`` environment variable.
     """
     if "EARTHENGINE_SERVICE_ACCOUNT" in os.environ:
+
         # extract the environment variables data
         private_key = os.environ["EARTHENGINE_SERVICE_ACCOUNT"]
-        ee_user = json.loads(private_key)["client_email"]
+
+        # small workaround to remove the quotes around the token
+        # related to a very specific issue with readthedocs interface
+        # https://github.com/readthedocs/readthedocs.org/issues/10553
+        pattern = re.compile(r"^'[^']*'$")
+        private_key = private_key[1:-1] if pattern.match(private_key) else private_key
 
         # connect to GEE using a temp file to avoid writing the key to disk
         with tempfile.TemporaryDirectory() as temp_dir:
             file = Path(temp_dir) / "private_key.json"
             file.write_text(private_key)
+            ee_user = json.loads(private_key)["client_email"]
             credentials = ee.ServiceAccountCredentials(ee_user, str(file))
             ee.Initialize(credentials=credentials, http_transport=httplib2.Http())
 
