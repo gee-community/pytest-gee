@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 from typing import Union
@@ -32,8 +33,16 @@ def init_ee_from_token():
     """
     if "EARTHENGINE_TOKEN" in os.environ:
 
-        # write the token to the appropriate folder
+        # read the ee_token from the environment variable
         ee_token = os.environ["EARTHENGINE_TOKEN"]
+
+        # small workaround to remove the quotes around the token
+        # related to a very specific issue with readthedocs interface
+        # https://github.com/readthedocs/readthedocs.org/issues/10553
+        pattern = re.compile(r"^'[^']*'$")
+        ee_token = ee_token[1:-1] if pattern.match(ee_token) else ee_token
+
+        # write the token to the appropriate folder
         credential_folder_path = Path.home() / ".config" / "earthengine"
         credential_folder_path.mkdir(parents=True, exist_ok=True)
         credential_file_path = credential_folder_path / "credentials"
