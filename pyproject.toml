@@ -51,7 +51,7 @@ test = [
   "coverage",
 ]
 doc = [
-  "sphinx>=6.2.1",
+  "sphinx>=6.2.1,<8",
   "pydata-sphinx-theme",
   "sphinx-copybutton",
   "sphinx-design",
