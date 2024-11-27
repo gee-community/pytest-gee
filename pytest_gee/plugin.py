@@ -63,7 +63,7 @@ def list_regression(
         The ListFixture object.
 
     Example:
-        ..code-block:: python
+        .. code-block:: python
 
             def test_list_regression(list_regression):
                 data = ee.List([1, 2, 3])
