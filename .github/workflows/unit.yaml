@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - uses: pre-commit/action@v3.0.0
 
   mypy:
@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Install nox
         run: pip install nox
       - name: run mypy checks
@@ -41,7 +41,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
       - name: Install nox
         run: pip install nox
       - name: build static docs
@@ -53,12 +53,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           - os: macos-latest # macos test
-            python-version: "3.11"
+            python-version: "3.13"
           - os: windows-latest # windows test
-            python-version: "3.11"
+            python-version: "3.13"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -71,11 +71,11 @@ jobs:
       - name: test with pytest
         run: nox -s ci-test
       - name: assess dead fixtures
-        if: ${{ matrix.python-version == '3.10' }}
+        if: ${{ matrix.python-version == '3.11' }}
         shell: bash
         run: nox -s dead-fixtures
       - uses: actions/upload-artifact@v4
-        if: ${{ matrix.python-version == '3.10' }}
+        if: ${{ matrix.python-version == '3.11' }}
         with:
           name: coverage
           path: coverage.xml
