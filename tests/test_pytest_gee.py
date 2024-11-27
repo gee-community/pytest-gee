@@ -42,3 +42,15 @@ def test_init_tree(gee_folder_root, gee_test_folder):
     assert str(folder) in asset_list
     assert str(image) in asset_list
     assert str(feature_collection) in asset_list
+
+
+def test_list_regression(list_regression):
+    """Test the list_regression fixture."""
+    data = ee.List([1, 2, 3])
+    list_regression.check(data)
+
+
+def test_list_regression_prescision(list_regression):
+    """Test the list_regression fixture with a different precision."""
+    data = ee.List([1.123456789, 2.123456789, 3.123456789])
+    list_regression.check(data, prescision=3)
