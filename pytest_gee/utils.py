@@ -242,3 +242,17 @@ def delete_assets(asset_id: Union[str, Path], dry_run: bool = True) -> list:
     delete(asset_id)
 
     return output
+
+
+def round_data(data: Union[list, dict], prescision: int = 6) -> Union[list, dict]:
+    """Recusrsively Round the values of a list to the given prescision."""
+    # change the generator depending on the collection type
+    generator = enumerate(data) if isinstance(data, list) else data.items()
+    for k, v in generator:
+        if isinstance(v, (list, dict)):
+            data[k] = round_data(v, prescision)
+        elif isinstance(v, float):
+            data[k] = round(v, prescision)
+        else:
+            data[k] = v
+    return data
