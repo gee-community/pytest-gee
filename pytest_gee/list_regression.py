@@ -1,5 +1,6 @@
 """Implementation of the ``list_regression`` fixture."""
 import os
+from typing import Optional
 
 import ee
 from pytest_regressions.data_regression import DataRegressionFixture
@@ -13,8 +14,8 @@ class ListFixture(DataRegressionFixture):
     def check(
         self,
         data_list: ee.List,
-        basename: str | None = None,
-        fullpath: os.PathLike | None = None,
+        basename: Optional[str] = None,
+        fullpath: Optional[os.PathLike] = None,
         prescision: int = 6,
     ):
         """Check the given list against a previously recorded version, or generate a new file.
