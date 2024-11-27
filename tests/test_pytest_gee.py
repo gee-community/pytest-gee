@@ -54,3 +54,15 @@ def test_list_regression_prescision(list_regression):
     """Test the list_regression fixture with a different precision."""
     data = ee.List([1.123456789, 2.123456789, 3.123456789])
     list_regression.check(data, prescision=3)
+
+
+def test_dictionary_regression(dictionary_regression):
+    """Test the dictionary_regression fixture."""
+    data = ee.Dictionary({"a": 1, "b": 2})
+    dictionary_regression.check(data)
+
+
+def test_dictionary_regression_prescision(dictionary_regression):
+    """Test the dictionary_regression fixture with a different precision."""
+    data = ee.Dictionary({"a": 1.123456789, "b": 2.123456789})
+    dictionary_regression.check(data, prescision=3)
