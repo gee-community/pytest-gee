@@ -9,6 +9,7 @@ import ee
 import pytest
 
 from . import utils
+from .feature_collection_regression import FeatureCollectionFixture
 from .list_regression import ListFixture
 
 
@@ -70,3 +71,27 @@ def list_regression(
                 list_regression.check(data)
     """
     return ListFixture(datadir, original_datadir, request)
+
+
+@pytest.fixture
+def feature_collection_regression(
+    datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
+) -> FeatureCollectionFixture:
+    """Fixture to test :py:class:`ee.FeatureCollection` objects.
+
+    Args:
+        datadir: The directory where the data files are stored.
+        original_datadir: The original data directory.
+        request: The pytest request object.
+
+    Returns:
+        The FeatureCollectionFixture object.
+
+    Example:
+        .. code-block:: python
+
+            def test_feature_collection_regression(feature_collection_regression):
+                data = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
+                feature_collection_regression.check(data)
+    """
+    return FeatureCollectionFixture(datadir, original_datadir, request)
