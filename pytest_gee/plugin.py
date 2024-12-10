@@ -87,16 +87,16 @@ def feature_collection_regression(
 
     Returns:
         The FeatureCollectionFixture object.
-        
+
     Example:
         .. code-block:: python
-        
+
             def test_feature_collection_regression(feature_collection_regression):
                 data = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
                 feature_collection_regression.check(data)
     """
     return FeatureCollectionFixture(datadir, original_datadir, request)
-    
+
 
 @pytest.fixture
 def dictionary_regression(
