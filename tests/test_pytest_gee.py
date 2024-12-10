@@ -55,8 +55,20 @@ def test_list_regression_prescision(list_regression):
     data = ee.List([1.123456789, 2.123456789, 3.123456789])
     list_regression.check(data, prescision=3)
 
-
+    
 def test_feature_collection_regression(feature_collection_regression):
     """Test the feature_collection_regression fixture."""
     fc = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
     feature_collection_regression.check(fc)
+
+    
+def test_dictionary_regression(dictionary_regression):
+    """Test the dictionary_regression fixture."""
+    data = ee.Dictionary({"a": 1, "b": 2})
+    dictionary_regression.check(data)
+
+
+def test_dictionary_regression_prescision(dictionary_regression):
+    """Test the dictionary_regression fixture with a different precision."""
+    data = ee.Dictionary({"a": 1.123456789, "b": 2.123456789})
+    dictionary_regression.check(data, prescision=3)

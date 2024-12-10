@@ -9,6 +9,7 @@ import ee
 import pytest
 
 from . import utils
+from .dictionary_regression import DictionaryFixture
 from .feature_collection_regression import FeatureCollectionFixture
 from .list_regression import ListFixture
 
@@ -53,7 +54,7 @@ def gee_test_folder(gee_hash, gee_folder_root, gee_folder_structure):
 def list_regression(
     datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
 ) -> ListFixture:
-    """Fixture to test ee.List objects.
+    """Fixture to test :py:class:`ee.List` objects.
 
     Args:
         datadir: The directory where the data files are stored.
@@ -86,12 +87,36 @@ def feature_collection_regression(
 
     Returns:
         The FeatureCollectionFixture object.
-
+        
     Example:
         .. code-block:: python
-
+        
             def test_feature_collection_regression(feature_collection_regression):
                 data = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
                 feature_collection_regression.check(data)
     """
     return FeatureCollectionFixture(datadir, original_datadir, request)
+    
+
+@pytest.fixture
+def dictionary_regression(
+    datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
+) -> DictionaryFixture:
+    """Fixture to test `ee.Dictionary` objects.
+
+    Args:
+        datadir: The directory where the data files are stored.
+        original_datadir: The original data directory.
+        request: The pytest request object.
+
+    Returns:
+        The DictionaryFixture object.
+
+    Example:
+        .. code-block:: python
+
+            def test_dictionary_regression(dictionary_regression):
+                data = ee.Dictionary({"a": 1, "b": 2})
+                dictionary_regression.check(data)
+    """
+    return DictionaryFixture(datadir, original_datadir, request)
