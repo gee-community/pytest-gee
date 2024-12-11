@@ -26,6 +26,7 @@ dependencies = [
   "earthengine-api>=0.1.397", # new ee.data.createFolder method
   "pytest",
   "pytest-regressions",
+  "geopandas",
 ]
 
 [[project.authors]]
