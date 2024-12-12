@@ -53,7 +53,7 @@ Paste this content in your CI/CD environment in a ``EARTHENGINE_TOKEN`` variable
 
 Here is a github action example:
 
-.. image:: _static/github_env_var.png
+.. image:: ../_static/github_env_var.png
     :alt: Github action environment variable setup
     :align: center
 
@@ -106,7 +106,7 @@ Paste this content of the `private-key.json` in your CI/CD environment in a ``EA
 
 Here is a github action example:
 
-.. image:: _static/github_env_var.png
+.. image:: ../_static/github_env_var.png
     :alt: Github action environment variable setup
     :align: center
 
