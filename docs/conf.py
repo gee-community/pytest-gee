@@ -30,10 +30,9 @@ templates_path = ["_template"]
 # -- Options for HTML output ---------------------------------------------------
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+html_logo = "_static/long-logo.png"
+html_favicon = "_static/logo.png"
 html_theme_options = {
-    "logo": {
-        "text": project,
-    },
     "use_edit_page_button": True,
     "footer_end": ["theme-version", "pypackage-credit"],
     "icon_links": [

@@ -45,6 +45,10 @@ pytest-gee
 Overview
 --------
 
+.. image:: https://raw.githubusercontent.com/gee-community/pytest-gee/main/docs/_static/logo.svg
+    :width: 20%
+    :align: right
+
 The Python plugin for your GEE based packages.
 
 Credits
