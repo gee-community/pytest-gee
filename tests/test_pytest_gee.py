@@ -3,6 +3,9 @@ import ee
 
 import pytest_gee
 
+landsat_image = "LANDSAT/LC08/C02/T1_L2/LC08_191031_20240607"
+"landsat image from 2024-06-07 on top of Rome"
+
 
 def test_hash_fixture(gee_hash):
     """Test the hash fixture."""
@@ -44,37 +47,58 @@ def test_init_tree(gee_folder_root, gee_test_folder):
     assert str(feature_collection) in asset_list
 
 
-def test_list_regression(list_regression):
-    """Test the list_regression fixture."""
+def test_list_regression(ee_list_regression):
+    """Test the ee_list_regression fixture."""
     data = ee.List([1, 2, 3])
-    list_regression.check(data)
+    ee_list_regression.check(data)
 
 
-def test_list_regression_prescision(list_regression):
-    """Test the list_regression fixture with a different precision."""
+def test_list_regression_prescision(ee_list_regression):
+    """Test the ee_list_regression fixture with a different precision."""
     data = ee.List([1.123456789, 2.123456789, 3.123456789])
-    list_regression.check(data, prescision=3)
+    ee_list_regression.check(data, prescision=3)
 
 
-def test_feature_collection_regression(feature_collection_regression):
-    """Test the feature_collection_regression fixture."""
+def test_feature_collection_regression(ee_feature_collection_regression):
+    """Test the ee_feature_collection_regression fixture."""
     fc = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
-    feature_collection_regression.check(fc)
+    ee_feature_collection_regression.check(fc)
 
 
-def test_feature_collection_regression_prescision(feature_collection_regression):
-    """Test the feature_collection_regression fixture."""
+def test_feature_collection_regression_prescision(ee_feature_collection_regression):
+    """Test the ee_feature_collection_regression fixture."""
     fc = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
-    feature_collection_regression.check(fc, prescision=4)
+    ee_feature_collection_regression.check(fc, prescision=4)
 
 
-def test_dictionary_regression(dictionary_regression):
-    """Test the dictionary_regression fixture."""
+def test_dictionary_regression(ee_dictionary_regression):
+    """Test the ee_dictionary_regression fixture."""
     data = ee.Dictionary({"a": 1, "b": 2})
-    dictionary_regression.check(data)
+    ee_dictionary_regression.check(data)
 
 
-def test_dictionary_regression_prescision(dictionary_regression):
-    """Test the dictionary_regression fixture with a different precision."""
+def test_dictionary_regression_prescision(ee_dictionary_regression):
+    """Test the ee_dictionary_regression fixture with a different precision."""
     data = ee.Dictionary({"a": 1.123456789, "b": 2.123456789})
-    dictionary_regression.check(data, prescision=3)
+    ee_dictionary_regression.check(data, prescision=3)
+
+
+def test_image_regression_3_bands(ee_image_regression):
+    """Test the image_regression fixture."""
+    image = ee.Image(landsat_image).select(["SR_B4", "SR_B3", "SR_B2"])
+    ee_image_regression.check(image, scale=1000)
+
+
+def test_image_regression_1_band(ee_image_regression):
+    """Test the image_regression fixture."""
+    image = ee.Image(landsat_image).normalizedDifference(["SR_B5", "SR_B4"])
+    ee_image_regression.check(image, scale=1000)
+
+
+def test_image_regression_with_viz(ee_image_regression):
+    """Test the image_regression fixture."""
+    image = ee.Image(landsat_image).normalizedDifference(["SR_B5", "SR_B4"])
+    # use magma palette and stretched to 2 sigma
+    palette = ["#000004", "#2C105C", "#711F81", "#B63679", "#EE605E", "#FDAE78", "#FCFDBF"]
+    viz = {"bands": ["nd"], "min": 0.0122, "max": 1.237, "palette": palette}  # codespell:ignore nd
+    ee_image_regression.check(image, scale=1000, viz_params=viz)
