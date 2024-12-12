@@ -63,4 +63,11 @@ autoapi_python_class_content = "init"
 autoapi_member_order = "groupwise"
 
 # -- Options for intersphinx output --------------------------------------------
-intersphinx_mapping = {}
+# fmt: off
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "pytest_regressions": ("https://pytest-regressions.readthedocs.io/en/latest/", None),
+    "pytest": ("https://docs.pytest.org/en/stable/", None),
+    "ee": ("https://developers.google.com/earth-engine/apidocs", "https://raw.githubusercontent.com/gee-community/sphinx-inventory/refs/heads/main/inventory/earthengine-api.inv"),
+}
+# fmt: on
