@@ -11,6 +11,7 @@ import pytest
 from . import utils
 from .dictionary_regression import DictionaryFixture
 from .feature_collection_regression import FeatureCollectionFixture
+from .image_regression import ImageFixture
 from .list_regression import ListFixture
 
 
@@ -51,7 +52,7 @@ def gee_test_folder(gee_hash, gee_folder_root, gee_folder_structure):
 
 
 @pytest.fixture
-def list_regression(
+def ee_list_regression(
     datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
 ) -> ListFixture:
     """Fixture to test :py:class:`ee.List` objects.
@@ -75,7 +76,7 @@ def list_regression(
 
 
 @pytest.fixture
-def feature_collection_regression(
+def ee_feature_collection_regression(
     datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
 ) -> FeatureCollectionFixture:
     """Fixture to test :py:class:`ee.FeatureCollection` objects.
@@ -99,7 +100,7 @@ def feature_collection_regression(
 
 
 @pytest.fixture
-def dictionary_regression(
+def ee_dictionary_regression(
     datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
 ) -> DictionaryFixture:
     """Fixture to test `ee.Dictionary` objects.
@@ -120,3 +121,27 @@ def dictionary_regression(
                 dictionary_regression.check(data)
     """
     return DictionaryFixture(datadir, original_datadir, request)
+
+
+@pytest.fixture
+def ee_image_regression(
+    datadir: Path, original_datadir: Path, request: pytest.FixtureRequest
+) -> ImageFixture:
+    """Fixture to test :py:class:`ee.Image` objects.
+
+    Args:
+        datadir: The directory where the data files are stored.
+        original_datadir: The original data directory.
+        request: The pytest request object.
+
+    Returns:
+        The ImageFixture object.
+
+    Example:
+        .. code-block:: python
+
+            def test_image_regression(image_regression):
+                data = ee.Image("LANDSAT/LC08/C02/T1_L2/LC08_191031_20210514")
+                image_regression.check(data, scale=1000)
+    """
+    return ImageFixture(datadir, original_datadir, request)
