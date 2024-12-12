@@ -31,6 +31,7 @@ html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 html_logo = "_static/long-logo.png"
 html_favicon = "_static/logo.png"
+html_sidebars = {"content/*": []}
 html_theme_options = {
     "use_edit_page_button": True,
     "footer_end": ["theme-version", "pypackage-credit"],
@@ -62,4 +63,11 @@ autoapi_python_class_content = "init"
 autoapi_member_order = "groupwise"
 
 # -- Options for intersphinx output --------------------------------------------
-intersphinx_mapping = {}
+# fmt: off
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "pytest_regressions": ("https://pytest-regressions.readthedocs.io/en/latest/", None),
+    "pytest": ("https://docs.pytest.org/en/stable/", None),
+    "ee": ("https://developers.google.com/earth-engine/apidocs", "https://raw.githubusercontent.com/gee-community/sphinx-inventory/refs/heads/main/inventory/earthengine-api.inv"),
+}
+# fmt: on

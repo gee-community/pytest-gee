@@ -118,5 +118,5 @@ install_types = true
 non_interactive = true
 warn_redundant_casts = true
 
-[tool.licensecheck]
-using = "PEP631"
+[tool.codespell]
+ignore-words-list = "nd"
