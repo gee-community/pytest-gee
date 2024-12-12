@@ -94,3 +94,14 @@ def test_image_regression_1_band(ee_image_regression):
         ["SR_B5", "SR_B4"]
     )
     ee_image_regression.check(image, scale=1000)
+
+
+def test_image_regression_with_viz(ee_image_regression):
+    """Test the image_regression fixture."""
+    image = ee.Image("LANDSAT/LC08/C02/T1_L2/LC08_191031_20210514").normalizedDifference(
+        ["SR_B5", "SR_B4"]
+    )
+    # use magma palette and default to [0, 1] clamp
+    palette = ["#000004", "#2C105C", "#711F81", "#B63679", "#EE605E", "#FDAE78", "#FCFDBF"]
+    viz = {"bands": ["nd"], "min": 0, "max": 1, "palette": palette}  # codespell:ignore nd
+    ee_image_regression.check(image, scale=1000, viz_params=viz)
