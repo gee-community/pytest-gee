@@ -71,6 +71,15 @@ def test_feature_collection_regression_prescision(ee_feature_collection_regressi
     ee_feature_collection_regression.check(fc, prescision=4)
 
 
+def test_feature_collection_regression_no_index(ee_feature_collection_regression):
+    """Test the ee_feature_collection_regression fixture."""
+    point = ee.Geometry.Point([0, 0])
+    size = ee.List.sequence(50, 100, 10)
+    geometries = size.map(lambda s: point.buffer(s, ee.Number(s).divide(5)))
+    fc = ee.FeatureCollection(geometries.map(lambda g: ee.Feature(ee.Geometry(g))))
+    ee_feature_collection_regression.check(fc, drop_index=True, prescision=4)
+
+
 def test_dictionary_regression(ee_dictionary_regression):
     """Test the ee_dictionary_regression fixture."""
     data = ee.Dictionary({"a": 1, "b": 2})
