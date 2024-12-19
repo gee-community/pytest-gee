@@ -65,19 +65,19 @@ def test_feature_collection_regression(ee_feature_collection_regression):
     ee_feature_collection_regression.check(fc)
 
 
-def test_feature_collection_regression_no_index(ee_feature_collection_regression):
-    """Test the ee_feature_collection_regression fixture."""
-    fc = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
-    ee_feature_collection_regression.check(fc, drop_index=True)
-
-
 def test_feature_collection_regression_prescision(ee_feature_collection_regression):
     """Test the ee_feature_collection_regression fixture."""
-    point = ee.Geometry.Point([0, 0])
-    size = ee.List.sequence(1, 3)
-    geometries = size.map(lambda s: point.buffer(s, ee.Number(s).divide(5)))
-    fc = ee.FeatureCollection(geometries.map(lambda g: ee.Feature(g)))
+    fc = ee.FeatureCollection("FAO/GAUL/2015/level0").filter(ee.Filter.eq("ADM0_NAME", "Holy See"))
     ee_feature_collection_regression.check(fc, prescision=4)
+
+
+def test_feature_collection_regression_no_index(ee_feature_collection_regression):
+    """Test the ee_feature_collection_regression fixture."""
+    point = ee.Geometry.Point([0, 0])
+    size = ee.List.sequence(50, 100, 10)
+    geometries = size.map(lambda s: point.buffer(s, ee.Number(s).divide(5)))
+    fc = ee.FeatureCollection(geometries.map(lambda g: ee.Feature(ee.Geometry(g))))
+    ee_feature_collection_regression.check(fc, drop_index=True, prescision=4)
 
 
 def test_dictionary_regression(ee_dictionary_regression):
