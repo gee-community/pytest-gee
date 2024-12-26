@@ -120,7 +120,7 @@ Here is a github action example:
     :alt: Github action environment variable setup
     :align: center
 
-#. First go to the :guilabel:`settings`` of your Github repository
+#. First go to the :guilabel:`settings` of your Github repository
 #. Then to :guilabel:`secretes and variables` -> :guilabel:`Actions`
 #. In this page, set a :guilabel:`new repository secret` with the name ``EARTHENGINE_SERVICE_ACCOUNT`` and paste the content of your ``credentials`` file in the value field.
 
