@@ -1,11 +1,13 @@
 """Implementation of the ``list_regression`` fixture."""
 import os
 from typing import Optional
+from contextlib import suppress
+
 
 import ee
 from pytest_regressions.data_regression import DataRegressionFixture
-
-from .utils import round_data
+import pytest
+from .utils import round_data, build_fullpath
 
 
 class ListFixture(DataRegressionFixture):
@@ -26,6 +28,30 @@ class ListFixture(DataRegressionFixture):
             fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             precision: The number of decimal places to round to when comparing floats.
         """
-        # round any float value before serving the data to the check function
+
+        # build the different filename to be consistent between our 3 checks
+        name = build_fullpath(self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names)
+        serialized_name = name.with_stem(f"backend_{name.name}")
+        data_name = name.with_stem(f"frontend_{name.name}")
+
+        # check the previously registered serialized call from GEE. If it matches the current call,
+        # we don't need to check the data
+        serialized = data_list.serialize()
+        with suppress(BaseException):
+            super().check(serialized, fullpath=serialized_name)
+            return
+
+        # if it needs to be checked, we need to round the float values to the same precision as the
+        # reference file
         data_list = round_data(data_list.getInfo(), prescision)
-        super().check(data_list, basename=basename, fullpath=fullpath)
+        try:
+            super().check(data_list, fullpath=data_name)
+
+            # IF we are here it means the data has been modified so we edit the API call accordingly
+            # to make sure next run will not be forced to call the API for a response.
+            serialized_name.unlink(missing_ok=True)
+            with suppress(BaseException):
+                super().check(serialized, fullpath=serialized_name)
+
+        except BaseException as e:
+            raise e
