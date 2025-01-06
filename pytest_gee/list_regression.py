@@ -1,13 +1,12 @@
 """Implementation of the ``list_regression`` fixture."""
 import os
-from typing import Optional
 from contextlib import suppress
-
+from typing import Optional
 
 import ee
 from pytest_regressions.data_regression import DataRegressionFixture
-import pytest
-from .utils import round_data, build_fullpath
+
+from .utils import build_fullpath, round_data
 
 
 class ListFixture(DataRegressionFixture):
@@ -28,9 +27,10 @@ class ListFixture(DataRegressionFixture):
             fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             precision: The number of decimal places to round to when comparing floats.
         """
-
         # build the different filename to be consistent between our 3 checks
-        name = build_fullpath(self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names)
+        name = build_fullpath(
+            self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names
+        )
         serialized_name = name.with_stem(f"backend_{name.name}").with_suffix(".yml")
         data_name = name.with_stem(f"frontend_{name.name}").with_suffix(".yml")
 

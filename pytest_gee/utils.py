@@ -6,20 +6,20 @@
 """
 from __future__ import annotations
 
-from pathlib import Path, PurePosixPath
-from typing import List, Optional, Union
-from warnings import warn
 import os
 import re
 from functools import partial
+from pathlib import Path, PurePosixPath
+from typing import List, Optional, Union
+from warnings import warn
 
 import ee
-from deprecated.sphinx import deprecated
-from ee.cli.utils import wait_for_task
 import pytest
 import yaml
+from deprecated.sphinx import deprecated
+from ee.cli.utils import wait_for_task
+from pytest_regressions.common import check_text_files, perform_regression_check
 from pytest_regressions.data_regression import RegressionYamlDumper
-from pytest_regressions.common import perform_regression_check, check_text_files
 
 
 @deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
@@ -264,6 +264,7 @@ def round_data(data: Union[list, dict], prescision: int = 6) -> Union[list, dict
             data[k] = v
     return data
 
+
 def build_fullpath(
     datadir: Path,
     request: pytest.FixtureRequest,
@@ -286,7 +287,9 @@ def build_fullpath(
 
     __tracebackhide__ = True
 
-    with_test_class_names = with_test_class_names or request.config.getoption("with_test_class_names")
+    with_test_class_names = with_test_class_names or request.config.getoption(
+        "with_test_class_names"
+    )
 
     if basename is None:
         if (request.node.cls is not None) and (with_test_class_names):
@@ -301,6 +304,7 @@ def build_fullpath(
         filename = (datadir / basename).with_suffix(extension)
 
     return filename
+
 
 def check_serialized(
     object: ee.ComputedObject,
@@ -318,6 +322,13 @@ def check_serialized(
     Args:
         object: the earthnegine object to check
         path: the full path to the file to check against. a "backend" prefix will be added.
+        datadir: Fixture embed_data.
+        original_datadir: Fixture embed_data.
+        request: Pytest request object.
+        basename: the basename of the file to test/record. If not given the name of the test is used.
+        fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
+        force_regen: if True, the file will be regenerated even if it exists.
+        with_test_class_names: if true it will use the test class name (if any) to compose the basename.
 
     Raise:
         AssertionError if the serialized object is different from the saved one.
@@ -326,11 +337,10 @@ def check_serialized(
     data_dict = object.serialize()
 
     # create a filename from the path
-    filename = path.with_stem(f"backend_{path.stem}")
+    path.with_stem(f"backend_{path.stem}")
 
     def dump(filename: Path) -> None:
-        """Dump dict contents to the given filename"""
-
+        """Dump dict contents to the given filename."""
         dumped_str = yaml.dump_all(
             [data_dict],
             Dumper=RegressionYamlDumper,
