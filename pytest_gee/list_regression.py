@@ -31,8 +31,8 @@ class ListFixture(DataRegressionFixture):
 
         # build the different filename to be consistent between our 3 checks
         name = build_fullpath(self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names)
-        serialized_name = name.with_stem(f"backend_{name.name}")
-        data_name = name.with_stem(f"frontend_{name.name}")
+        serialized_name = name.with_stem(f"backend_{name.name}").with_suffix(".yml")
+        data_name = name.with_stem(f"frontend_{name.name}").with_suffix(".yml")
 
         # check the previously registered serialized call from GEE. If it matches the current call,
         # we don't need to check the data
