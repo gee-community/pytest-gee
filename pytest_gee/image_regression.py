@@ -1,9 +1,13 @@
 """implementation of the ``image_regression`` fixture."""
+import os
+from contextlib import suppress
 from typing import Optional
 
 import ee
 import requests
 from pytest_regressions.image_regression import ImageRegressionFixture
+
+from .utils import build_fullpath
 
 
 class ImageFixture(ImageRegressionFixture):
@@ -15,6 +19,7 @@ class ImageFixture(ImageRegressionFixture):
         diff_threshold: float = 0.1,
         expect_equal: bool = True,
         basename: Optional[str] = None,
+        fullpath: Optional[os.PathLike] = None,
         scale: Optional[int] = 30,
         viz_params: Optional[dict] = None,
     ):
@@ -31,27 +36,53 @@ class ImageFixture(ImageRegressionFixture):
             diff_threshold: The threshold for the difference between the expected and obtained images.
             expect_equal: If ``True`` the images are expected to be equal, otherwise they are expected to be different.
             basename: The basename of the file to test/record. If not given the name of the test is used.
+            fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             scale: The scale to use for the thumbnail.
             viz_params: The visualization parameters to use for the thumbnail. If not given, the min and max values of the image will be used.
         """
-        # grescale the original image
+        # rescale the original image
         geometry = data_image.geometry()
-        image = data_image.clipToBoundsAndScale(geometry, scale=scale)
+        data_image = data_image.clipToBoundsAndScale(geometry, scale=scale)
+
+        # build the different filename to be consistent between our 3 checks
+        name = build_fullpath(
+            self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names
+        )
+        serialized_name = name.with_stem(f"serialized_{name.name}").with_suffix(".yml")
+        data_name = name.with_suffix(".png")
+
+        # check the previously registered serialized call from GEE. If it matches the current call,
+        # we don't need to check the data
+        serialized = data_image.serialize()
+        with suppress(BaseException):
+            super().check(serialized, fullpath=serialized_name)
+            return
 
         # extract min and max for visualization
-        minMax = image.reduceRegion(ee.Reducer.minMax(), geometry, scale)
+        minMax = data_image.reduceRegion(ee.Reducer.minMax(), geometry, scale)
 
         # create visualization parameters based on the computed minMax values
         if viz_params is None:
-            nbBands = ee.Algorithms.If(image.bandNames().size().gte(3), 3, 1)
-            bands = image.bandNames().slice(0, ee.Number(nbBands))
+            nbBands = ee.Algorithms.If(data_image.bandNames().size().gte(3), 3, 1)
+            bands = data_image.bandNames().slice(0, ee.Number(nbBands))
             min = bands.map(lambda b: minMax.get(ee.String(b).cat("_min")))
             max = bands.map(lambda b: minMax.get(ee.String(b).cat("_max")))
             viz_params = ee.Dictionary({"bands": bands, "min": min, "max": max}).getInfo()
 
         # get the thumbnail image
-        thumb_url = image.getThumbURL(params=viz_params)
+        thumb_url = data_image.getThumbURL(params=viz_params)
         byte_data = requests.get(thumb_url).content
 
-        # call the parent check method
-        super().check(byte_data, diff_threshold, expect_equal, basename=basename)
+        # if it needs to be checked, we need to round the float values to the same precision as the
+        # reference file
+        try:
+            super().check(byte_data, diff_threshold, expect_equal, fullpath=data_name)
+
+            # IF we are here it means the data has been modified so we edit the API call accordingly
+            # to make sure next run will not be forced to call the API for a response.
+            serialized_name.unlink(missing_ok=True)
+            with suppress(BaseException):
+                super().check(serialized, fullpath=serialized_name)
+
+        except BaseException as e:
+            raise e

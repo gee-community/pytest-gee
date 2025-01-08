@@ -1,0 +1,5 @@
+'{"result": "0", "values": {"0": {"functionInvocationValue": {"functionName": "Collection.filter",
+  "arguments": {"collection": {"functionInvocationValue": {"functionName": "Collection.loadTable",
+  "arguments": {"tableId": {"constantValue": "FAO/GAUL/2015/level0"}}}}, "filter":
+  {"functionInvocationValue": {"functionName": "Filter.equals", "arguments": {"leftField":
+  {"constantValue": "ADM0_NAME"}, "rightValue": {"constantValue": "Holy See"}}}}}}}}}'

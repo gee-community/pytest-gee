@@ -1,0 +1,23 @@
+'{"result": "0", "values": {"1": {"functionInvocationValue": {"functionName": "Feature.select",
+  "arguments": {"input": {"argumentReference": "_MAPPING_VAR_0_0"}, "propertySelectors":
+  {"functionInvocationValue": {"functionName": "List.remove", "arguments": {"element":
+  {"constantValue": "system:index"}, "list": {"functionInvocationValue": {"functionName":
+  "Element.propertyNames", "arguments": {"element": {"argumentReference": "_MAPPING_VAR_0_0"}}}}}}}}}},
+  "2": {"functionInvocationValue": {"functionName": "Feature", "arguments": {"geometry":
+  {"argumentReference": "_MAPPING_VAR_0_0"}}}}, "3": {"functionInvocationValue": {"functionName":
+  "Geometry.buffer", "arguments": {"distance": {"argumentReference": "_MAPPING_VAR_0_0"},
+  "geometry": {"functionInvocationValue": {"functionName": "GeometryConstructors.Point",
+  "arguments": {"coordinates": {"constantValue": [0, 0]}}}}, "maxError": {"functionInvocationValue":
+  {"functionName": "ErrorMargin", "arguments": {"value": {"functionInvocationValue":
+  {"functionName": "Number.divide", "arguments": {"left": {"argumentReference": "_MAPPING_VAR_0_0"},
+  "right": {"constantValue": 5}}}}}}}}}}, "0": {"functionInvocationValue": {"functionName":
+  "Collection.map", "arguments": {"baseAlgorithm": {"functionDefinitionValue": {"argumentNames":
+  ["_MAPPING_VAR_0_0"], "body": "1"}}, "collection": {"functionInvocationValue": {"functionName":
+  "Collection", "arguments": {"features": {"functionInvocationValue": {"functionName":
+  "List.map", "arguments": {"baseAlgorithm": {"functionDefinitionValue": {"argumentNames":
+  ["_MAPPING_VAR_0_0"], "body": "2"}}, "dropNulls": {"constantValue": false}, "list":
+  {"functionInvocationValue": {"functionName": "List.map", "arguments": {"baseAlgorithm":
+  {"functionDefinitionValue": {"argumentNames": ["_MAPPING_VAR_0_0"], "body": "3"}},
+  "dropNulls": {"constantValue": false}, "list": {"functionInvocationValue": {"functionName":
+  "List.sequence", "arguments": {"end": {"constantValue": 100}, "start": {"constantValue":
+  50}, "step": {"constantValue": 10}}}}}}}}}}}}}}}}}}'
