@@ -1,4 +1,5 @@
 """Implementation of the ``dictionary_regression`` fixture."""
+
 import os
 from typing import Optional
 

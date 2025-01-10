@@ -1,4 +1,5 @@
 """The init file of the package."""
+
 from __future__ import annotations
 
 import json
@@ -32,7 +33,6 @@ def init_ee_from_token():
         As all init method of pytest-gee, this method will fallback to a regular ``ee.Initialize()`` if the environment variable is not found e.g. on your local computer.
     """
     if "EARTHENGINE_TOKEN" in os.environ:
-
         # read the ee_token from the environment variable
         ee_token = os.environ["EARTHENGINE_TOKEN"]
 
@@ -70,7 +70,6 @@ def init_ee_from_service_account():
         As all init method of ``pytest-gee``, this method will fallback to a regular ``ee.Initialize`` using the ``EARTHENGINE_PROJECT`` environment variable.
     """
     if "EARTHENGINE_SERVICE_ACCOUNT" in os.environ:
-
         # extract the environment variables data
         private_key = os.environ["EARTHENGINE_SERVICE_ACCOUNT"]
 

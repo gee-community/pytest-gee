@@ -53,7 +53,7 @@ def docs(session):
 @nox.session(name="mypy", reuse_venv=True, venv_backend="uv")
 def mypy(session):
     """Run a mypy check of the lib."""
-    session.install("mypy")
+    session.install("mypy", "types-requests", "types-Deprecated")
     test_files = session.posargs or ["pytest_gee"]
     session.run("mypy", *test_files)
 

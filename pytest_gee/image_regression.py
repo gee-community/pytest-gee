@@ -1,4 +1,5 @@
 """implementation of the ``image_regression`` fixture."""
+
 from typing import Optional
 
 import ee

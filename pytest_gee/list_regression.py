@@ -1,4 +1,5 @@
 """Implementation of the ``list_regression`` fixture."""
+
 import os
 from typing import Optional
 
