@@ -110,7 +110,7 @@ Service account
 
 .. warning::
 
-    This documentation assumes that you already have a Google cloud service account and that you have generated an API key for it. If not, please refer to Google own `documentation <https://cloud.google.com/iam/docs/keys-create-delete>` to proceed.
+    This documentation assumes that you already have a Google cloud service account and that you have generated an API key for it. If not, please refer to Google own `documentation <https://cloud.google.com/iam/docs/keys-create-delete>`__ to proceed.
 
 Paste this content of the `private-key.json` in your CI/CD environment in a ``EARTHENGINE_SERVICE_ACCOUNT`` variable.
 

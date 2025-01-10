@@ -1,4 +1,5 @@
 """Test the pytest_gee package."""
+
 import ee
 
 import pytest_gee

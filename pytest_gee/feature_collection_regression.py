@@ -1,4 +1,5 @@
 """Implementation of the ``feature_collection_regression`` fixture."""
+
 import os
 from contextlib import suppress
 from typing import Optional
