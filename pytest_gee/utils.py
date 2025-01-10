@@ -6,6 +6,7 @@
 """
 from __future__ import annotations
 
+import json
 import os
 import re
 from functools import partial
@@ -312,8 +313,6 @@ def check_serialized(
     datadir: Path,
     original_datadir: Path,
     request: pytest.FixtureRequest,
-    basename: Optional[str] = None,
-    fullpath: Optional["os.PathLike[str]"] = None,
     force_regen: bool = False,
     with_test_class_names: bool = False,
 ):
@@ -321,12 +320,10 @@ def check_serialized(
 
     Args:
         object: the earthnegine object to check
-        path: the full path to the file to check against. a "backend" prefix will be added.
+        path: the full path to the file to check against. a "serialized" prefix will be added.
         datadir: Fixture embed_data.
         original_datadir: Fixture embed_data.
         request: Pytest request object.
-        basename: the basename of the file to test/record. If not given the name of the test is used.
-        fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
         force_regen: if True, the file will be regenerated even if it exists.
         with_test_class_names: if true it will use the test class name (if any) to compose the basename.
 
@@ -334,10 +331,14 @@ def check_serialized(
         AssertionError if the serialized object is different from the saved one.
     """
     # serialize the object# extract the data from the computed object
-    data_dict = object.serialize()
+    data_dict = json.loads(object.serialize())
 
     # create a filename from the path
-    path.with_stem(f"backend_{path.stem}")
+    fullpath = path.with_stem(f"serialized_{path.stem}").with_suffix(".yml")
+
+    # delete the file upstream if force_regen is set
+    if force_regen is True:
+        fullpath.unlink(missing_ok=True)
 
     def dump(filename: Path) -> None:
         """Dump dict contents to the given filename."""
@@ -360,8 +361,6 @@ def check_serialized(
         check_fn=partial(check_text_files, encoding="UTF-8"),
         dump_fn=dump,
         extension=".yml",
-        basename=basename,
         fullpath=fullpath,
-        force_regen=force_regen,
         with_test_class_names=with_test_class_names,
     )

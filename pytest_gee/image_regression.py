@@ -7,7 +7,7 @@ import ee
 import requests
 from pytest_regressions.image_regression import ImageRegressionFixture
 
-from .utils import build_fullpath
+from .utils import build_fullpath, check_serialized
 
 
 class ImageFixture(ImageRegressionFixture):
@@ -45,17 +45,26 @@ class ImageFixture(ImageRegressionFixture):
         data_image = data_image.clipToBoundsAndScale(geometry, scale=scale)
 
         # build the different filename to be consistent between our 3 checks
-        name = build_fullpath(
-            self.original_datadir, self.request, "", basename, fullpath, self.with_test_class_names
+        data_name = build_fullpath(
+            datadir=self.original_datadir,
+            request=self.request,
+            extension=".png",
+            basename=basename,
+            fullpath=fullpath,
+            with_test_class_names=self.with_test_class_names,
         )
-        serialized_name = name.with_stem(f"serialized_{name.name}").with_suffix(".yml")
-        data_name = name.with_suffix(".png")
 
         # check the previously registered serialized call from GEE. If it matches the current call,
         # we don't need to check the data
-        serialized = data_image.serialize()
         with suppress(BaseException):
-            super().check(serialized, fullpath=serialized_name)
+            check_serialized(
+                object=data_image,
+                path=data_name,
+                datadir=self.datadir,
+                original_datadir=self.original_datadir,
+                request=self.request,
+                with_test_class_names=self.with_test_class_names,
+            )
             return
 
         # extract min and max for visualization
@@ -80,9 +89,16 @@ class ImageFixture(ImageRegressionFixture):
 
             # IF we are here it means the data has been modified so we edit the API call accordingly
             # to make sure next run will not be forced to call the API for a response.
-            serialized_name.unlink(missing_ok=True)
             with suppress(BaseException):
-                super().check(serialized, fullpath=serialized_name)
+                check_serialized(
+                    object=data_image,
+                    path=data_name,
+                    datadir=self.datadir,
+                    original_datadir=self.original_datadir,
+                    request=self.request,
+                    with_test_class_names=self.with_test_class_names,
+                    force_regen=True,
+                )
 
         except BaseException as e:
             raise e

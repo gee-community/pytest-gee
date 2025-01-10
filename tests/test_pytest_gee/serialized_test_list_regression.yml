@@ -1,1 +1,7 @@
-'{"result": "0", "values": {"0": {"constantValue": [1, 2, 3]}}}'
+result: '0'
+values:
+  '0':
+    constantValue:
+    - 1
+    - 2
+    - 3
