@@ -1,0 +1,6 @@
+result: '0'
+values:
+  '0':
+    constantValue:
+      a: 1
+      b: 2

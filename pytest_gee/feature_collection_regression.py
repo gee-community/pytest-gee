@@ -1,13 +1,14 @@
 """Implementation of the ``feature_collection_regression`` fixture."""
 
 import os
+from contextlib import suppress
 from typing import Optional
 
 import ee
 import geopandas as gpd
 from pytest_regressions.data_regression import DataRegressionFixture
 
-from .utils import round_data
+from .utils import build_fullpath, check_serialized, round_data
 
 
 class FeatureCollectionFixture(DataRegressionFixture):
@@ -33,6 +34,29 @@ class FeatureCollectionFixture(DataRegressionFixture):
         if drop_index is True:
             data_fc = data_fc.map(lambda f: f.select(f.propertyNames().remove("system:index")))
 
+        # build the different filename to be consistent between our 3 checks
+        data_name = build_fullpath(
+            datadir=self.original_datadir,
+            request=self.request,
+            extension=".yml",
+            basename=basename,
+            fullpath=fullpath,
+            with_test_class_names=self.with_test_class_names,
+        )
+
+        # check the previously registered serialized call from GEE. If it matches the current call,
+        # we don't need to check the data
+        with suppress(BaseException):
+            check_serialized(
+                object=data_fc,
+                path=data_name,
+                datadir=self.datadir,
+                original_datadir=self.original_datadir,
+                request=self.request,
+                with_test_class_names=self.with_test_class_names,
+            )
+            return
+
         # round the geometry using geopandas to make sre with use the specific number of decimal places
         gdf = gpd.GeoDataFrame.from_features(data_fc.getInfo())
         gdf.geometry = gdf.set_precision(grid_size=10 ** (-prescision)).remove_repeated_points()
@@ -41,4 +65,23 @@ class FeatureCollectionFixture(DataRegressionFixture):
         data = gdf.to_geo_dict()
         data = round_data(data, prescision)
 
-        super().check(data, basename=basename, fullpath=fullpath)
+        # if it needs to be checked, we need to round the float values to the same precision as the
+        # reference file
+        try:
+            super().check(data, fullpath=data_name)
+
+            # IF we are here it means the data has been modified so we edit the API call accordingly
+            # to make sure next run will not be forced to call the API for a response.
+            with suppress(BaseException):
+                check_serialized(
+                    object=data_fc,
+                    path=data_name,
+                    datadir=self.datadir,
+                    original_datadir=self.original_datadir,
+                    request=self.request,
+                    with_test_class_names=self.with_test_class_names,
+                    force_regen=True,
+                )
+
+        except BaseException as e:
+            raise e

@@ -25,7 +25,7 @@ dependencies = [
   "deprecated>=1.2.14",
   "earthengine-api>=0.1.397", # new ee.data.createFolder method
   "pytest",
-  "pytest-regressions",
+  "pytest-regressions>=2.7.0", # get the fullpath parameter in the Imageregression
   "geopandas",
   "pillow",
 ]

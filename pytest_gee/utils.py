@@ -7,13 +7,21 @@
 
 from __future__ import annotations
 
+import json
+import os
+import re
+from functools import partial
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
 from warnings import warn
 
 import ee
+import pytest
+import yaml
 from deprecated.sphinx import deprecated
 from ee.cli.utils import wait_for_task
+from pytest_regressions.common import check_text_files, perform_regression_check
+from pytest_regressions.data_regression import RegressionYamlDumper
 
 
 @deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
@@ -257,3 +265,103 @@ def round_data(data: Union[list, dict], prescision: int = 6) -> Union[list, dict
         else:
             data[k] = v
     return data
+
+
+def build_fullpath(
+    datadir: Path,
+    request: pytest.FixtureRequest,
+    extension: str,
+    basename: Optional[str] = None,
+    fullpath: Optional["os.PathLike[str]"] = None,
+    with_test_class_names: bool = False,
+) -> Path:
+    """Generate a fullpath from parameters of the test.
+
+    Args:
+        datadir: Fixture embed_data.
+        request: Pytest request object.
+        extension: Extension of files compared by this check.
+        basename: basename of the file to test/record. If not given the name of the test is used. Use either `basename` or `fullpath`.
+        fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
+        with_test_class_names: if true it will use the test class name (if any) to compose the basename.
+    """
+    assert not (basename and fullpath), "pass either basename or fullpath, but not both"
+
+    __tracebackhide__ = True
+
+    with_test_class_names = with_test_class_names or request.config.getoption(
+        "with_test_class_names"
+    )
+
+    if basename is None:
+        if (request.node.cls is not None) and (with_test_class_names):
+            basename = re.sub(r"[\W]", "_", request.node.cls.__name__) + "_"
+        else:
+            basename = ""
+        basename += re.sub(r"[\W]", "_", request.node.name)
+
+    if fullpath:
+        filename = Path(fullpath)
+    else:
+        filename = (datadir / basename).with_suffix(extension)
+
+    return filename
+
+
+def check_serialized(
+    object: ee.ComputedObject,
+    path: Path,
+    datadir: Path,
+    original_datadir: Path,
+    request: pytest.FixtureRequest,
+    force_regen: bool = False,
+    with_test_class_names: bool = False,
+):
+    """Check if the serialized GEE object is the same as the saved one.
+
+    Args:
+        object: the earthnegine object to check
+        path: the full path to the file to check against. a "serialized" prefix will be added.
+        datadir: Fixture embed_data.
+        original_datadir: Fixture embed_data.
+        request: Pytest request object.
+        force_regen: if True, the file will be regenerated even if it exists.
+        with_test_class_names: if true it will use the test class name (if any) to compose the basename.
+
+    Raise:
+        AssertionError if the serialized object is different from the saved one.
+    """
+    # serialize the object# extract the data from the computed object
+    data_dict = json.loads(object.serialize())
+
+    # create a filename from the path
+    fullpath = path.with_stem(f"serialized_{path.stem}").with_suffix(".yml")
+
+    # delete the file upstream if force_regen is set
+    if force_regen is True:
+        fullpath.unlink(missing_ok=True)
+
+    def dump(filename: Path) -> None:
+        """Dump dict contents to the given filename."""
+        dumped_str = yaml.dump_all(
+            [data_dict],
+            Dumper=RegressionYamlDumper,
+            default_flow_style=False,
+            allow_unicode=True,
+            indent=2,
+            encoding="utf-8",
+        )
+        filename.write_bytes(dumped_str)
+
+    # check the previously registered serialized call from GEE. If it matches the current call,
+    # we don't need to check the data
+    perform_regression_check(
+        datadir=datadir,
+        original_datadir=original_datadir,
+        request=request,
+        check_fn=partial(check_text_files, encoding="UTF-8"),
+        dump_fn=dump,
+        extension=".yml",
+        fullpath=fullpath,
+        with_test_class_names=with_test_class_names,
+    )
