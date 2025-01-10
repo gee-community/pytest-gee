@@ -11,13 +11,15 @@ on:
 env:
   EARTHENGINE_SERVICE_ACCOUNT: ${{ secrets.EARTHENGINE_SERVICE_ACCOUNT }}
   EARTHENGINE_PROJECT: ${{ secrets.EARTHENGINE_PROJECT }}
+  FORCE_COLOR: 1
+  PIP_ROOT_USER_ACTION: ignore
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - uses: pre-commit/action@v3.0.0
@@ -25,12 +27,12 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install nox
-        run: pip install nox
+        run: pip install nox[uv]
       - name: run mypy checks
         run: nox -s mypy
 
@@ -38,12 +40,12 @@ jobs:
     needs: [lint, mypy]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Install nox
-        run: pip install nox
+        run: pip install nox[uv]
       - name: build static docs
         run: nox -s docs
 
@@ -61,13 +63,13 @@ jobs:
             python-version: "3.13"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install nox
-        run: pip install nox
+        run: pip install nox[uv]
       - name: test with pytest
         run: nox -s ci-test
       - name: assess dead fixtures
@@ -89,7 +91,7 @@ jobs:
           name: coverage
           path: coverage.xml
       - name: codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           file: ./coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}

@@ -46,6 +46,12 @@ html_theme_options = {
             "url": "https://pypi.org/project/pytest-gee/",
             "icon": "fa-brands fa-python",
         },
+        {
+            "name": "Conda",
+            "url": "https://anaconda.org/conda-forge/pytest-gee",
+            "icon": "fa-custom fa-conda",
+            "type": "fontawesome",
+        },
     ],
 }
 html_context = {
