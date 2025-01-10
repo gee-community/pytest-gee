@@ -1,0 +1,20 @@
+result: '0'
+values:
+  '0':
+    functionInvocationValue:
+      arguments:
+        collection:
+          functionInvocationValue:
+            arguments:
+              tableId:
+                constantValue: FAO/GAUL/2015/level0
+            functionName: Collection.loadTable
+        filter:
+          functionInvocationValue:
+            arguments:
+              leftField:
+                constantValue: ADM0_NAME
+              rightValue:
+                constantValue: Holy See
+            functionName: Filter.equals
+      functionName: Collection.filter

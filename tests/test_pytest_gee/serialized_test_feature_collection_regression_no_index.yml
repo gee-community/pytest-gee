@@ -1,0 +1,97 @@
+result: '0'
+values:
+  '0':
+    functionInvocationValue:
+      arguments:
+        baseAlgorithm:
+          functionDefinitionValue:
+            argumentNames:
+            - _MAPPING_VAR_0_0
+            body: '1'
+        collection:
+          functionInvocationValue:
+            arguments:
+              features:
+                functionInvocationValue:
+                  arguments:
+                    baseAlgorithm:
+                      functionDefinitionValue:
+                        argumentNames:
+                        - _MAPPING_VAR_0_0
+                        body: '2'
+                    dropNulls:
+                      constantValue: false
+                    list:
+                      functionInvocationValue:
+                        arguments:
+                          baseAlgorithm:
+                            functionDefinitionValue:
+                              argumentNames:
+                              - _MAPPING_VAR_0_0
+                              body: '3'
+                          dropNulls:
+                            constantValue: false
+                          list:
+                            functionInvocationValue:
+                              arguments:
+                                end:
+                                  constantValue: 100
+                                start:
+                                  constantValue: 50
+                                step:
+                                  constantValue: 10
+                              functionName: List.sequence
+                        functionName: List.map
+                  functionName: List.map
+            functionName: Collection
+      functionName: Collection.map
+  '1':
+    functionInvocationValue:
+      arguments:
+        input:
+          argumentReference: _MAPPING_VAR_0_0
+        propertySelectors:
+          functionInvocationValue:
+            arguments:
+              element:
+                constantValue: system:index
+              list:
+                functionInvocationValue:
+                  arguments:
+                    element:
+                      argumentReference: _MAPPING_VAR_0_0
+                  functionName: Element.propertyNames
+            functionName: List.remove
+      functionName: Feature.select
+  '2':
+    functionInvocationValue:
+      arguments:
+        geometry:
+          argumentReference: _MAPPING_VAR_0_0
+      functionName: Feature
+  '3':
+    functionInvocationValue:
+      arguments:
+        distance:
+          argumentReference: _MAPPING_VAR_0_0
+        geometry:
+          functionInvocationValue:
+            arguments:
+              coordinates:
+                constantValue:
+                - 0
+                - 0
+            functionName: GeometryConstructors.Point
+        maxError:
+          functionInvocationValue:
+            arguments:
+              value:
+                functionInvocationValue:
+                  arguments:
+                    left:
+                      argumentReference: _MAPPING_VAR_0_0
+                    right:
+                      constantValue: 5
+                  functionName: Number.divide
+            functionName: ErrorMargin
+      functionName: Geometry.buffer

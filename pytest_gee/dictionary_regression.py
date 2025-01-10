@@ -1,11 +1,12 @@
 """Implementation of the ``dictionary_regression`` fixture."""
 import os
+from contextlib import suppress
 from typing import Optional
 
 import ee
 from pytest_regressions.data_regression import DataRegressionFixture
 
-from .utils import round_data
+from .utils import build_fullpath, check_serialized, round_data
 
 
 class DictionaryFixture(DataRegressionFixture):
@@ -26,6 +27,47 @@ class DictionaryFixture(DataRegressionFixture):
             fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             precision: The number of decimal places to round to when comparing floats.
         """
-        # round any float value before serving the data to the check function
-        data_dict = round_data(data_dict.getInfo(), prescision)
-        super().check(data_dict, basename=basename, fullpath=fullpath)
+        # build the different filename to be consistent between our 3 checks
+        data_name = build_fullpath(
+            datadir=self.original_datadir,
+            request=self.request,
+            extension=".yml",
+            basename=basename,
+            fullpath=fullpath,
+            with_test_class_names=self.with_test_class_names,
+        )
+
+        # check the previously registered serialized call from GEE. If it matches the current call,
+        # we don't need to check the data
+        with suppress(BaseException):
+            check_serialized(
+                object=ee.Dictionary(data_dict),
+                path=data_name,
+                datadir=self.datadir,
+                original_datadir=self.original_datadir,
+                request=self.request,
+                with_test_class_names=self.with_test_class_names,
+            )
+            return
+
+        # if it needs to be checked, we need to round the float values to the same precision as the
+        # reference file
+        data = round_data(data_dict.getInfo(), prescision)
+        try:
+            super().check(data, fullpath=data_name)
+
+            # IF we are here it means the data has been modified so we edit the API call accordingly
+            # to make sure next run will not be forced to call the API for a response.
+            with suppress(BaseException):
+                check_serialized(
+                    object=data_dict,
+                    path=data_name,
+                    datadir=self.datadir,
+                    original_datadir=self.original_datadir,
+                    request=self.request,
+                    with_test_class_names=self.with_test_class_names,
+                    force_regen=True,
+                )
+
+        except BaseException as e:
+            raise e

@@ -1,0 +1,6 @@
+result: '0'
+values:
+  '0':
+    constantValue:
+      a: 1.123456789
+      b: 2.123456789
