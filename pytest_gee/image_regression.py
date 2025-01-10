@@ -1,4 +1,5 @@
 """implementation of the ``image_regression`` fixture."""
+
 import os
 from contextlib import suppress
 from typing import Optional
