@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pytest-gee"
-version = "0.6.0"
+version = "0.6.1"
 description = "The Python plugin for your GEE based packages."
 keywords = [
   "skeleton",
@@ -76,7 +76,7 @@ post-install-commands = ["pre-commit install"]
 [tool.commitizen]
 tag_format = "v$major.$minor.$patch$prerelease"
 update_changelog_on_bump = false
-version = "0.6.0"
+version = "0.6.1"
 version_files = [
     "pyproject.toml:version",
     "pytest_gee/__init__.py:__version__",
