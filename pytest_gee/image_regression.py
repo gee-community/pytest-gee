@@ -54,19 +54,23 @@ class ImageFixture(ImageRegressionFixture):
             fullpath=fullpath,
             with_test_class_names=self.with_test_class_names,
         )
+        serialized_name = data_name.with_stem(f"serialized_{data_name.stem}").with_suffix(".yml")
 
         # check the previously registered serialized call from GEE. If it matches the current call,
         # we don't need to check the data
         with suppress(BaseException):
             check_serialized(
                 object=data_image,
-                path=data_name,
+                path=serialized_name,
                 datadir=self.datadir,
                 original_datadir=self.original_datadir,
                 request=self.request,
                 with_test_class_names=self.with_test_class_names,
             )
             return
+
+        # delete the previously created file if wasn't successful
+        serialized_name.unlink(missing_ok=True)
 
         # extract min and max for visualization
         minMax = data_image.reduceRegion(ee.Reducer.minMax(), geometry, scale)

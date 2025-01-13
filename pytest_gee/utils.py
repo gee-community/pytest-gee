@@ -321,7 +321,7 @@ def check_serialized(
 
     Args:
         object: the earthnegine object to check
-        path: the full path to the file to check against. a "serialized" prefix will be added.
+        path: the full path to the file to check against.
         datadir: Fixture embed_data.
         original_datadir: Fixture embed_data.
         request: Pytest request object.
@@ -334,12 +334,9 @@ def check_serialized(
     # serialize the object# extract the data from the computed object
     data_dict = json.loads(object.serialize())
 
-    # create a filename from the path
-    fullpath = path.with_stem(f"serialized_{path.stem}").with_suffix(".yml")
-
     # delete the file upstream if force_regen is set
     if force_regen is True:
-        fullpath.unlink(missing_ok=True)
+        path.unlink(missing_ok=True)
 
     def dump(filename: Path) -> None:
         """Dump dict contents to the given filename."""
@@ -362,6 +359,6 @@ def check_serialized(
         check_fn=partial(check_text_files, encoding="UTF-8"),
         dump_fn=dump,
         extension=".yml",
-        fullpath=fullpath,
+        fullpath=path,
         with_test_class_names=with_test_class_names,
     )
