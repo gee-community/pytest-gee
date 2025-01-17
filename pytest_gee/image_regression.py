@@ -1,7 +1,6 @@
 """implementation of the ``image_regression`` fixture."""
 
 import os
-from contextlib import suppress
 from typing import Optional
 
 import ee
@@ -56,54 +55,42 @@ class ImageFixture(ImageRegressionFixture):
         )
         serialized_name = data_name.with_stem(f"serialized_{data_name.stem}").with_suffix(".yml")
 
-        # check the previously registered serialized call from GEE. If it matches the current call,
-        # we don't need to check the data
-        with suppress(BaseException):
+        is_serialized_equal = check_serialized(
+            object=data_image,
+            path=serialized_name,
+            datadir=self.datadir,
+            request=self.request,
+        )
+
+        if is_serialized_equal:
+            # serialized is equal? -> pass test
+            # TODO: add proper logging
+            return
+        else:
+            # extract min and max for visualization
+            minMax = data_image.reduceRegion(ee.Reducer.minMax(), geometry, scale)
+
+            # create visualization parameters based on the computed minMax values
+            if viz_params is None:
+                nbBands = ee.Algorithms.If(data_image.bandNames().size().gte(3), 3, 1)
+                bands = data_image.bandNames().slice(0, ee.Number(nbBands))
+                min = bands.map(lambda b: minMax.get(ee.String(b).cat("_min")))
+                max = bands.map(lambda b: minMax.get(ee.String(b).cat("_max")))
+                viz_params = ee.Dictionary({"bands": bands, "min": min, "max": max}).getInfo()
+
+            # get the thumbnail image
+            thumb_url = data_image.getThumbURL(params=viz_params)
+            byte_data = requests.get(thumb_url).content
+
+            # if it needs to be checked, we need to round the float values to the same precision as the
+            # reference file
+            super().check(byte_data, diff_threshold, expect_equal, fullpath=data_name)
+
+            # if we are here it means that the query result is equal but the serialized is not -> regenerate serialized
+            serialized_name.unlink(missing_ok=True)
             check_serialized(
                 object=data_image,
                 path=serialized_name,
                 datadir=self.datadir,
-                original_datadir=self.original_datadir,
                 request=self.request,
-                with_test_class_names=self.with_test_class_names,
             )
-            return
-
-        # delete the previously created file if wasn't successful
-        serialized_name.unlink(missing_ok=True)
-
-        # extract min and max for visualization
-        minMax = data_image.reduceRegion(ee.Reducer.minMax(), geometry, scale)
-
-        # create visualization parameters based on the computed minMax values
-        if viz_params is None:
-            nbBands = ee.Algorithms.If(data_image.bandNames().size().gte(3), 3, 1)
-            bands = data_image.bandNames().slice(0, ee.Number(nbBands))
-            min = bands.map(lambda b: minMax.get(ee.String(b).cat("_min")))
-            max = bands.map(lambda b: minMax.get(ee.String(b).cat("_max")))
-            viz_params = ee.Dictionary({"bands": bands, "min": min, "max": max}).getInfo()
-
-        # get the thumbnail image
-        thumb_url = data_image.getThumbURL(params=viz_params)
-        byte_data = requests.get(thumb_url).content
-
-        # if it needs to be checked, we need to round the float values to the same precision as the
-        # reference file
-        try:
-            super().check(byte_data, diff_threshold, expect_equal, fullpath=data_name)
-
-            # IF we are here it means the data has been modified so we edit the API call accordingly
-            # to make sure next run will not be forced to call the API for a response.
-            with suppress(BaseException):
-                check_serialized(
-                    object=data_image,
-                    path=data_name,
-                    datadir=self.datadir,
-                    original_datadir=self.original_datadir,
-                    request=self.request,
-                    with_test_class_names=self.with_test_class_names,
-                    force_regen=True,
-                )
-
-        except BaseException as e:
-            raise e
