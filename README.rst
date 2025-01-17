@@ -58,6 +58,8 @@ This plugin uses a data directory (courtesy of ``pytest-datadir``) to store expe
 which are stored and used as baseline for future test runs.
 You can also define your own data directory directly as described in the ``pytest_regression`` documentation.
 
+toto
+
 Credits
 -------
 
