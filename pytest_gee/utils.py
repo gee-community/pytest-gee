@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import os
 import re
-from functools import partial
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
 from warnings import warn
@@ -20,7 +19,7 @@ import pytest
 import yaml
 from deprecated.sphinx import deprecated
 from ee.cli.utils import wait_for_task
-from pytest_regressions.common import check_text_files, perform_regression_check
+from pytest_regressions.common import check_text_files
 from pytest_regressions.data_regression import RegressionYamlDumper
 
 
@@ -312,27 +311,24 @@ def check_serialized(
     object: ee.ComputedObject,
     path: Path,
     datadir: Path,
-    original_datadir: Path,
     request: pytest.FixtureRequest,
     force_regen: bool = False,
-    with_test_class_names: bool = False,
-):
+) -> bool:
     """Check if the serialized GEE object is the same as the saved one.
 
     Args:
-        object: the earthnegine object to check
+        object: the Earth Engine object to check
         path: the full path to the file to check against.
         datadir: Fixture embed_data.
-        original_datadir: Fixture embed_data.
         request: Pytest request object.
         force_regen: if True, the file will be regenerated even if it exists.
-        with_test_class_names: if true it will use the test class name (if any) to compose the basename.
 
-    Raise:
-        AssertionError if the serialized object is different from the saved one.
+    Returns:
+        A boolean indicating whether the serialized object is equal to the saved serialized object.
     """
-    # serialize the object# extract the data from the computed object
-    data_dict = json.loads(object.serialize())
+    data_str = object.serialize()
+    data_dict = json.loads(data_str)
+    force_regen = force_regen or request.config.getoption("force_regen")
 
     # delete the file upstream if force_regen is set
     if force_regen is True:
@@ -348,17 +344,22 @@ def check_serialized(
             indent=2,
             encoding="utf-8",
         )
-        filename.write_bytes(dumped_str)
+        with open(filename, "wb") as thefile:
+            thefile.write(dumped_str)
 
-    # check the previously registered serialized call from GEE. If it matches the current call,
-    # we don't need to check the data
-    perform_regression_check(
-        datadir=datadir,
-        original_datadir=original_datadir,
-        request=request,
-        check_fn=partial(check_text_files, encoding="UTF-8"),
-        dump_fn=dump,
-        extension=".yml",
-        fullpath=path,
-        with_test_class_names=with_test_class_names,
-    )
+    # always create obtained serialized file
+    obtained_path = datadir / path.name
+    dump(obtained_path)
+
+    # the serialized file does not exists, create and return False
+    if not path.is_file():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        dump(path)
+        return False
+
+    try:
+        check_text_files(obtained_path, path, encoding="utf-8")
+    except AssertionError:
+        return False
+    else:
+        return True
