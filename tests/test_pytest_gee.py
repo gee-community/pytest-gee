@@ -112,3 +112,10 @@ def test_image_regression_with_viz(ee_image_regression):
     palette = ["#000004", "#2C105C", "#711F81", "#B63679", "#EE605E", "#FDAE78", "#FCFDBF"]
     viz = {"bands": ["nd"], "min": 0.0122, "max": 1.237, "palette": palette}
     ee_image_regression.check(image, scale=1000, viz_params=viz)
+
+
+def test_image_regression_with_region(ee_image_regression):
+    """Test the image_regression fixture."""
+    image = ee.Image(landsat_image).normalizedDifference(["SR_B5", "SR_B4"])
+    vatican = ee.Geometry.Point([12.453585, 41.903115]).buffer(100)
+    ee_image_regression.check(image, scale=30, region=vatican)

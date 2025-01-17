@@ -2,7 +2,7 @@
 
 import os
 from contextlib import suppress
-from typing import Optional
+from typing import Optional, Union
 
 import ee
 import requests
@@ -23,6 +23,7 @@ class ImageFixture(ImageRegressionFixture):
         fullpath: Optional[os.PathLike] = None,
         scale: Optional[int] = 30,
         viz_params: Optional[dict] = None,
+        region: Optional[Union[ee.FeatureCollection, ee.Feature, ee.Geometry]] = None,
     ):
         """Check the given image against a previously recorded version, or generate a new file.
 
@@ -40,9 +41,15 @@ class ImageFixture(ImageRegressionFixture):
             fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             scale: The scale to use for the thumbnail.
             viz_params: The visualization parameters to use for the thumbnail. If not given, the min and max values of the image will be used.
+            region:The region to use for clipping the image. If not given, the image's region will be used.
         """
         # rescale the original image
-        geometry = data_image.geometry()
+        if isinstance(region, (ee.FeatureCollection, ee.Feature)):
+            geometry = region.geometry()
+        elif isinstance(region, ee.Geometry):
+            geometry = region
+        else:
+            geometry = data_image.geometry()
         data_image = data_image.clipToBoundsAndScale(geometry, scale=scale)
 
         # build the different filename to be consistent between our 3 checks
