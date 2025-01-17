@@ -1,7 +1,6 @@
 """Implementation of the ``dictionary_regression`` fixture."""
 
 import os
-from contextlib import suppress
 from typing import Optional
 
 import ee
@@ -39,40 +38,27 @@ class DictionaryFixture(DataRegressionFixture):
         )
         serialized_name = data_name.with_stem(f"serialized_{data_name.stem}").with_suffix(".yml")
 
-        # check the previously registered serialized call from GEE. If it matches the current call,
-        # we don't need to check the data
-        with suppress(BaseException):
-            check_serialized(
-                object=ee.Dictionary(data_dict),
-                path=serialized_name,
-                datadir=self.datadir,
-                original_datadir=self.original_datadir,
-                request=self.request,
-                with_test_class_names=self.with_test_class_names,
-            )
+        is_serialized_equal = check_serialized(
+            object=data_dict,
+            path=serialized_name,
+            datadir=self.datadir,
+            request=self.request,
+        )
+
+        if is_serialized_equal:
+            # serialized is equal? -> pass test
+            # TODO: add proper logging
             return
+        else:
+            data = round_data(data_dict.getInfo(), prescision)
 
-        # delete the previously created file if wasn't successful
-        serialized_name.unlink(missing_ok=True)
-
-        # if it needs to be checked, we need to round the float values to the same precision as the
-        # reference file
-        data = round_data(data_dict.getInfo(), prescision)
-        try:
             super().check(data, fullpath=data_name)
 
-            # IF we are here it means the data has been modified so we edit the API call accordingly
-            # to make sure next run will not be forced to call the API for a response.
-            with suppress(BaseException):
-                check_serialized(
-                    object=data_dict,
-                    path=data_name,
-                    datadir=self.datadir,
-                    original_datadir=self.original_datadir,
-                    request=self.request,
-                    with_test_class_names=self.with_test_class_names,
-                    force_regen=True,
-                )
-
-        except BaseException as e:
-            raise e
+            # if we are here it means that the query result is equal but the serialized is not -> regenerate serialized
+            serialized_name.unlink(missing_ok=True)
+            check_serialized(
+                object=data_dict,
+                path=serialized_name,
+                datadir=self.datadir,
+                request=self.request,
+            )

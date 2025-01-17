@@ -1,7 +1,6 @@
 """Implementation of the ``feature_collection_regression`` fixture."""
 
 import os
-from contextlib import suppress
 from typing import Optional
 
 import ee
@@ -43,49 +42,36 @@ class FeatureCollectionFixture(DataRegressionFixture):
             fullpath=fullpath,
             with_test_class_names=self.with_test_class_names,
         )
+
         serialized_name = data_name.with_stem(f"serialized_{data_name.stem}").with_suffix(".yml")
 
-        # check the previously registered serialized call from GEE. If it matches the current call,
-        # we don't need to check the data
-        with suppress(BaseException):
+        is_serialized_equal = check_serialized(
+            object=data_fc,
+            path=serialized_name,
+            datadir=self.datadir,
+            request=self.request,
+        )
+
+        if is_serialized_equal:
+            # serialized is equal? -> pass test
+            # TODO: add proper logging
+            return
+        else:
+            # round the geometry using geopandas to make sre with use the specific number of decimal places
+            gdf = gpd.GeoDataFrame.from_features(data_fc.getInfo())
+            gdf.geometry = gdf.set_precision(grid_size=10 ** (-prescision)).remove_repeated_points()
+
+            # round any float value before serving the data to the check function
+            data = gdf.to_geo_dict()
+            data = round_data(data, prescision)
+
+            super().check(data, fullpath=data_name)
+
+            # if we are here it means that the query result is equal but the serialized is not -> regenerate serialized
+            serialized_name.unlink(missing_ok=True)
             check_serialized(
                 object=data_fc,
                 path=serialized_name,
                 datadir=self.datadir,
-                original_datadir=self.original_datadir,
                 request=self.request,
-                with_test_class_names=self.with_test_class_names,
             )
-            return
-
-        # delete the previously created file if wasn't successful
-        serialized_name.unlink(missing_ok=True)
-
-        # round the geometry using geopandas to make sre with use the specific number of decimal places
-        gdf = gpd.GeoDataFrame.from_features(data_fc.getInfo())
-        gdf.geometry = gdf.set_precision(grid_size=10 ** (-prescision)).remove_repeated_points()
-
-        # round any float value before serving the data to the check function
-        data = gdf.to_geo_dict()
-        data = round_data(data, prescision)
-
-        # if it needs to be checked, we need to round the float values to the same precision as the
-        # reference file
-        try:
-            super().check(data, fullpath=data_name)
-
-            # IF we are here it means the data has been modified so we edit the API call accordingly
-            # to make sure next run will not be forced to call the API for a response.
-            with suppress(BaseException):
-                check_serialized(
-                    object=data_fc,
-                    path=data_name,
-                    datadir=self.datadir,
-                    original_datadir=self.original_datadir,
-                    request=self.request,
-                    with_test_class_names=self.with_test_class_names,
-                    force_regen=True,
-                )
-
-        except BaseException as e:
-            raise e
