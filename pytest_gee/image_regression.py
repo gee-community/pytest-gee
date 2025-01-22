@@ -44,12 +44,8 @@ class ImageFixture(ImageRegressionFixture):
             region:The region to use for clipping the image. If not given, the image's region will be used.
         """
         # rescale the original image
-        if isinstance(region, (ee.FeatureCollection, ee.Feature)):
-            geometry = region.geometry()
-        elif isinstance(region, ee.Geometry):
-            geometry = region
-        else:
-            geometry = data_image.geometry()
+        region = data_image if region is None else region 
+        geometry = region if isinstance(region, ee.Geometry) else region.geometry()
         data_image = data_image.clipToBoundsAndScale(geometry, scale=scale)
 
         # build the different filename to be consistent between our 3 checks
