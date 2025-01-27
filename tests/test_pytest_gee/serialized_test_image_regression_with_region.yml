@@ -1,0 +1,36 @@
+result: '0'
+values:
+  '0':
+    functionInvocationValue:
+      arguments:
+        geometry:
+          functionInvocationValue:
+            arguments:
+              distance:
+                constantValue: 100
+              geometry:
+                functionInvocationValue:
+                  arguments:
+                    coordinates:
+                      constantValue:
+                      - 12.453585
+                      - 41.903115
+                  functionName: GeometryConstructors.Point
+            functionName: Geometry.buffer
+        input:
+          functionInvocationValue:
+            arguments:
+              bandNames:
+                constantValue:
+                - SR_B5
+                - SR_B4
+              input:
+                functionInvocationValue:
+                  arguments:
+                    id:
+                      constantValue: LANDSAT/LC08/C02/T1_L2/LC08_191031_20240607
+                  functionName: Image.load
+            functionName: Image.normalizedDifference
+        scale:
+          constantValue: 30
+      functionName: Image.clipToBoundsAndScale
