@@ -18,7 +18,7 @@ def lint(session):
     session.run("pre-commit", "run", "--all-files", *session.posargs)
 
 
-@nox.session(reuse_venv=True, venv_backend="uv")
+@nox.session(reuse_venv=True)
 def test(session):
     """Run the selected tests and report coverage in html."""
     session.install(".[test]")
