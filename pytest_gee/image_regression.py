@@ -100,7 +100,7 @@ class ImageFixture(ImageRegressionFixture):
             with suppress(BaseException):
                 check_serialized(
                     object=data_image,
-                    path=data_name,
+                    path=serialized_name,
                     datadir=self.datadir,
                     original_datadir=self.original_datadir,
                     request=self.request,
