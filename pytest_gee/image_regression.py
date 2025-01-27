@@ -6,6 +6,7 @@ from typing import Optional, Union
 
 import ee
 import requests
+from pytest import fail
 from pytest_regressions.image_regression import ImageRegressionFixture
 
 from .utils import build_fullpath, check_serialized
@@ -61,7 +62,7 @@ class ImageFixture(ImageRegressionFixture):
 
         # check the previously registered serialized call from GEE. If it matches the current call,
         # we don't need to check the data
-        with suppress(BaseException):
+        with suppress(AssertionError, fail.Exception):
             check_serialized(
                 object=data_image,
                 path=serialized_name,
@@ -97,7 +98,7 @@ class ImageFixture(ImageRegressionFixture):
 
             # IF we are here it means the data has been modified so we edit the API call accordingly
             # to make sure next run will not be forced to call the API for a response.
-            with suppress(BaseException):
+            with suppress(AssertionError, fail.Exception):
                 check_serialized(
                     object=data_image,
                     path=serialized_name,
@@ -108,5 +109,5 @@ class ImageFixture(ImageRegressionFixture):
                     force_regen=True,
                 )
 
-        except BaseException as e:
+        except (AssertionError, fail.Exception) as e:
             raise e

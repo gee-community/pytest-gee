@@ -5,6 +5,7 @@ from contextlib import suppress
 from typing import Optional
 
 import ee
+from pytest import fail
 from pytest_regressions.data_regression import DataRegressionFixture
 
 from .utils import build_fullpath, check_serialized, round_data
@@ -41,7 +42,7 @@ class DictionaryFixture(DataRegressionFixture):
 
         # check the previously registered serialized call from GEE. If it matches the current call,
         # we don't need to check the data
-        with suppress(BaseException):
+        with suppress(AssertionError, fail.Exception):
             check_serialized(
                 object=ee.Dictionary(data_dict),
                 path=serialized_name,
@@ -63,10 +64,10 @@ class DictionaryFixture(DataRegressionFixture):
 
             # IF we are here it means the data has been modified so we edit the API call accordingly
             # to make sure next run will not be forced to call the API for a response.
-            with suppress(BaseException):
+            with suppress(AssertionError, fail.Exception):
                 check_serialized(
                     object=data_dict,
-                    path=data_name,
+                    path=serialized_name,
                     datadir=self.datadir,
                     original_datadir=self.original_datadir,
                     request=self.request,
@@ -74,5 +75,5 @@ class DictionaryFixture(DataRegressionFixture):
                     force_regen=True,
                 )
 
-        except BaseException as e:
+        except (AssertionError, fail.Exception) as e:
             raise e
