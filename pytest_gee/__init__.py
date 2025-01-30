@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import os
 import re
-import tempfile
 from pathlib import Path
 from typing import Union
 
@@ -79,13 +78,13 @@ def init_ee_from_service_account():
         pattern = re.compile(r"^'[^']*'$")
         private_key = private_key[1:-1] if pattern.match(private_key) else private_key
 
-        # connect to GEE using a temp file to avoid writing the key to disk
-        with tempfile.TemporaryDirectory() as temp_dir:
-            file = Path(temp_dir) / "private_key.json"
-            file.write_text(private_key)
-            ee_user = json.loads(private_key)["client_email"]
-            credentials = ee.ServiceAccountCredentials(ee_user, str(file))
-            ee.Initialize(credentials=credentials, http_transport=httplib2.Http())
+        # connect to GEE using a a ServiceAccountCredential object based on the
+        # private key data
+        ee_user = json.loads(private_key)["client_email"]
+        credentials = ee.ServiceAccountCredentials(ee_user, key_data=private_key)
+        ee.Initialize(
+            credentials=credentials, project=credentials.project_id, http_transport=httplib2.Http()
+        )
 
     elif "EARTHENGINE_PROJECT" in os.environ:
         # if the user is in local development the authentication should already be available
@@ -93,9 +92,8 @@ def init_ee_from_service_account():
         ee.Initialize(project=os.environ["EARTHENGINE_PROJECT"], http_transport=httplib2.Http())
 
     else:
-        raise ValueError(
-            "EARTHENGINE_SERVICE_ACCOUNT or EARTHENGINE_PROJECT environment variable is missing"
-        )
+        msg = "EARTHENGINE_SERVICE_ACCOUNT or EARTHENGINE_PROJECT environment variable is missing"
+        raise ValueError(msg)
 
 
 @deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
