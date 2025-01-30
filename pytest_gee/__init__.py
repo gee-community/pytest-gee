@@ -81,7 +81,7 @@ def init_ee_from_service_account():
         # connect to GEE using a a ServiceAccountCredential object based on the
         # private key data
         ee_user = json.loads(private_key)["client_email"]
-        credentials = ee.ServiceAccountCredentials(ee_user, private_key)
+        credentials = ee.ServiceAccountCredentials(ee_user, key_data=private_key)
         ee.Initialize(
             credentials=credentials, project=credentials.project_id, http_transport=httplib2.Http()
         )
