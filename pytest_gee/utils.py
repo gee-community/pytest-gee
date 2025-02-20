@@ -7,9 +7,11 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import os
 import re
+import time
 from functools import partial
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
@@ -19,9 +21,53 @@ import ee
 import pytest
 import yaml
 from deprecated.sphinx import deprecated
-from ee.cli.utils import wait_for_task
 from pytest_regressions.common import check_text_files, perform_regression_check
 from pytest_regressions.data_regression import RegressionYamlDumper
+
+TASK_FINISHED_STATES: tuple[str, str, str] = (
+    ee.batch.Task.State.COMPLETED,
+    ee.batch.Task.State.FAILED,
+    ee.batch.Task.State.CANCELLED,
+)
+
+
+def wait_for_task(task_id: str, timeout: float, log_progress: bool = True):
+    """Waits for the specified task to finish, or a timeout to occur.
+
+    The method is a workaround for for a warning that we see in all our tests and pipeline.
+    It's reported to Google team here: https://issuetracker.google.com/issues/329560181
+
+    Args:
+      task_id: The ID of the task to wait for.
+      timeout: The maximum time to wait, in seconds.
+      log_progress: Whether to log the progress of the task while waiting.
+    """
+    start = time.time()
+    elapsed = 0.0
+    last_check = 0.0
+    while True:
+        elapsed = time.time() - start
+        status = ee.data.getTaskStatus(task_id)[0]
+        state = status["state"]
+        if state in TASK_FINISHED_STATES:
+            error_message = status.get("error_message", None)
+            print("Task %s ended at state: %s after %.2f seconds" % (task_id, state, elapsed))
+            if error_message:
+                raise ee.ee_exception.EEException("Error: %s" % error_message)
+            return
+        if log_progress and elapsed - last_check >= 30:
+            print(
+                "[{:%H:%M:%S}] Current state for task {}: {}".format(
+                    datetime.datetime.now(), task_id, state
+                )
+            )
+            last_check = elapsed
+        remaining = timeout - elapsed
+        if remaining > 0:
+            time.sleep(min(10, remaining))
+        else:
+            break
+    print("Wait for task %s timed out after %.2f seconds" % (task_id, elapsed))
 
 
 @deprecated(version="0.3.5", reason="Use the vanilla GEE ``wait_for_task`` function instead.")
