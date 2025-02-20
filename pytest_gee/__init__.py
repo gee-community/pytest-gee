@@ -14,7 +14,7 @@ from deprecated.sphinx import deprecated
 
 from .utils import wait_for_task
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 __author__ = "Pierrick Rambaud"
 __email__ = "pierrick.rambaud49@gmail.com"
 
