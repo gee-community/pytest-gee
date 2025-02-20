@@ -11,7 +11,8 @@ from typing import Union
 import ee
 import httplib2
 from deprecated.sphinx import deprecated
-from ee.cli.utils import wait_for_task
+
+from .utils import wait_for_task
 
 __version__ = "0.7.1"
 __author__ = "Pierrick Rambaud"
