@@ -119,3 +119,13 @@ def test_image_regression_with_region(ee_image_regression):
     image = ee.Image(landsat_image).normalizedDifference(["SR_B5", "SR_B4"])
     vatican = ee.Geometry.Point([12.453585, 41.903115]).buffer(100)
     ee_image_regression.check(image, scale=30, region=vatican)
+
+
+def test_image_regression_with_overlay(ee_image_regression):
+    """Test the image_regression fixture with overlay param."""
+    image = ee.Image(landsat_image).select(["SR_B4", "SR_B3", "SR_B2"])
+    centroid = image.geometry().centroid()
+    overlay = ee.FeatureCollection(
+        [ee.Feature(centroid, {"style": {"color": "red", "pointShape": "plus", "pointSize": 10}})]
+    )
+    ee_image_regression.check(image, scale=100, region=centroid.buffer(20000), overlay=overlay)
