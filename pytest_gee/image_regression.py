@@ -25,10 +25,11 @@ class ImageFixture(ImageRegressionFixture):
         scale: Optional[int] = 30,
         viz_params: Optional[dict] = None,
         region: Optional[Union[ee.FeatureCollection, ee.Feature, ee.Geometry]] = None,
+        overlay: Optional[ee.FeatureCollection] = None,
     ):
         """Check the given image against a previously recorded version, or generate a new file.
 
-        This method will create a thumnail version of the requested image. It is made to allow a human user to check the result of the
+        This method will create a thumbnail version of the requested image. It is made to allow a human user to check the result of the
         Computation. The thumbnail will be computed on the fly using earthengine. This mean that the test must be reasonable in size and scale.
         We will perform no feasibility checks and your computation might crash if you are too greedy.
         The input image will be either a single band image (displayed using black&white colormap) or a 3 band image (displayed using as fake RGB bands).
@@ -42,7 +43,8 @@ class ImageFixture(ImageRegressionFixture):
             fullpath: complete path to use as a reference file. This option will ignore ``datadir`` fixture when reading *expected* files but will still use it to write *obtained* files. Useful if a reference file is located in the session data dir for example.
             scale: The scale to use for the thumbnail.
             viz_params: The visualization parameters to use for the thumbnail. If not given, the min and max values of the image will be used.
-            region:The region to use for clipping the image. If not given, the image's region will be used.
+            region: The region to use for clipping the image. If not given, the image's region will be used.
+            overlay: A FeatureCollection to draw on top of the image. The style will be taken from each Feature's "style" property.
         """
         # rescale the original image
         region = data_image if region is None else region
@@ -87,8 +89,12 @@ class ImageFixture(ImageRegressionFixture):
             max = bands.map(lambda b: minMax.get(ee.String(b).cat("_max")))
             viz_params = ee.Dictionary({"bands": bands, "min": min, "max": max}).getInfo()
 
+        rgb = data_image.visualize(**viz_params)
+        if overlay:
+            rgb = rgb.blend(overlay.style(styleProperty="style"))
+
         # get the thumbnail image
-        thumb_url = data_image.getThumbURL(params=viz_params)
+        thumb_url = rgb.getThumbURL()
         byte_data = requests.get(thumb_url).content
 
         # if it needs to be checked, we need to round the float values to the same precision as the
