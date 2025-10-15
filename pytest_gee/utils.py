@@ -7,11 +7,9 @@
 
 from __future__ import annotations
 
-import datetime
 import json
 import os
 import re
-import time
 from functools import partial
 from pathlib import Path, PurePosixPath
 from typing import List, Optional, Union
@@ -21,9 +19,9 @@ import ee
 import pytest
 import yaml
 from deprecated.sphinx import deprecated
+from ee.cli.utils import wait_for_task
 from pytest_regressions.common import check_text_files, perform_regression_check
 from pytest_regressions.data_regression import RegressionYamlDumper
-from ee.cli.utils import wait_for_task
 
 TASK_FINISHED_STATES: tuple[str, str, str] = (
     ee.batch.Task.State.COMPLETED,
