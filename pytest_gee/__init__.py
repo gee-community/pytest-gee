@@ -47,7 +47,7 @@ def init_ee_from_token():
         credential_file_path = credential_folder_path / "credentials"
         credential_file_path.write_text(ee_token)
 
-    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
+    project_id = os.environ.get("EARTHENGINE_PROJECT")
     if project_id is None:
         raise ValueError(
             "The project name cannot be detected."
