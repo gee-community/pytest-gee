@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 from pathlib import Path
 
-import ee
 import pytest
+from ee._state import get_state
 
 from . import utils
 from .dictionary_regression import DictionaryFixture
@@ -27,12 +26,13 @@ def gee_folder_root():
     """Link to the root folder of the connected account."""
     # The credential information cannot be reached from
     # the ee API as reported in https://issuetracker.google.com/issues/325020447
-    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
-    if project_id is None:
-        raise ValueError(
-            "The project name cannot be detected."
-            "Please set the EARTHENGINE_PROJECT environment variable."
-        )
+    project_id = get_state().cloud_api_user_project
+    # project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
+    # if project_id is None:
+    #     raise ValueError(
+    #         "The project name cannot be detected."
+    #         "Please set the EARTHENGINE_PROJECT environment variable."
+    #     )
     return Path(f"projects/{project_id}/assets")
 
 
