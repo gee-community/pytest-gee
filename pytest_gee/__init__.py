@@ -11,8 +11,7 @@ from typing import Union
 import ee
 import httplib2
 from deprecated.sphinx import deprecated
-
-from .utils import wait_for_task
+from ee.cli.utils import wait_for_task
 
 __version__ = "0.8.0"
 __author__ = "Pierrick Rambaud"
@@ -48,7 +47,7 @@ def init_ee_from_token():
         credential_file_path = credential_folder_path / "credentials"
         credential_file_path.write_text(ee_token)
 
-    project_id = os.environ.get("EARTHENGINE_PROJECT", ee.data._cloud_api_user_project)
+    project_id = os.environ.get("EARTHENGINE_PROJECT")
     if project_id is None:
         raise ValueError(
             "The project name cannot be detected."
