@@ -82,7 +82,9 @@ def init_ee_from_service_account():
         # private key data
         ee_user = json.loads(private_key)["client_email"]
         credentials = ee.ServiceAccountCredentials(ee_user, key_data=private_key)
-        ee.Initialize(credentials=credentials, http_transport=httplib2.Http())
+        ee.Initialize(
+            credentials=credentials, project=credentials.project_id, http_transport=httplib2.Http()
+        )
 
     elif "EARTHENGINE_PROJECT" in os.environ:
         # if the user is in local development the authentication should already be available
